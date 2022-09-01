@@ -1,0 +1,78 @@
+<html>
+<head>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta content="text/html;charset=utf-8" http-equiv="content-type">
+    <title>Audio format conversion example</title>
+    <link href="css/main.css" rel="stylesheet">
+    <link rel="icon" href="data:image/ico;base64,aWNv">
+    <style>
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>
+        Convert Audio To Ogg Example
+    </h1>
+</header>
+
+<!--浏览器支持-->
+<section class="noteCard card">
+    <header>
+        <h3>Browser compatibility</h3>
+    </header>
+    <div class="note">
+        <p>Support <strong>Chrome、Edge、Firefox</strong>、Other Chrome Kernel Browsers</p>
+        <p>Not support <strong>Safari、IE、old Edge</strong></p>
+    </div>
+</section>
+
+<!--设置录制时长-->
+<section class="duration card">
+    <header>
+        <h3>Set recording duration</h3>
+    </header>
+    <div id="recordingDuration">
+        <label>Duration <span>30</span> (second):</label>
+        <input type="range" min="3" max="32" value="32">
+    </div>
+</section>
+
+<!--file upload-->
+<section class="controller card">
+    <header>
+        <h3>File upload</h3>
+    </header>
+    <div>
+        <input type="file" class="localShare" id="uploadFile" style="display: block;" />
+        <div>
+            Conversion progress: <span id="progress">0</span>(%)
+        </div>
+    </div>
+</section>
+
+<!-- converted file -->
+<section class="player card">
+    <header>
+        <h3>Converted file</h3>
+    </header>
+    <div>
+        <audio id="player" controls autoplay></audio>
+    </div>
+    <div><a id="link">Download Link</a></div>
+</section>
+
+<section class="console card">
+    <header>
+        <h3>Console</h3>
+    </header>
+    <!-- Log will be printed here -->
+    <div id="errorLog" class="log"></div>
+</section>
+
+<!--development-->
+<script type="text/javascript" src="src/recorder.js"></script>
+<script type="text/javascript" src="src/encoderOgg.js"></script>
+<script type="text/javascript" src="src/index.js"></script>
+</body>
+</html>
