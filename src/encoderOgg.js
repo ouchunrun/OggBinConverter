@@ -150,7 +150,7 @@ function encoderOgg (data) {
             // 更新录制时长
             recorder.setRecordingDuration(recordingDuration)
             bufferSource.connect(destination)
-            bufferSource.start(0)  // 从0秒开始播放
+            bufferSource.start()
 
             // 创建一个新的MediaStreamAudioSourceNode 对象，将声音输入这个对像
             mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
@@ -179,7 +179,7 @@ function encoderOgg (data) {
 
         fileReader.readAsArrayBuffer(file)
         recorder = createRecorder(data)
-        let defaultRing = ['ring1', 'ring2', 'ring3', 'ring4', 'ring5', 'ring6', 'silent']
+        let defaultRing = ['ring1', 'ring2', 'ring3', 'ring4', 'ring5', 'ring6', 'doorbell', 'silent']
         let fileName = file.name.replace(/\.[^\.]+$/, '')
         if(defaultRing.includes(fileName)){
             fileName = 'cust_' + fileName

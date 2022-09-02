@@ -18,17 +18,49 @@
 ### 转换格式与限制
 
 - 1.音频文件转换为ogg格式文件，采样率 16K， 单声道
-- 2.文件最短时长不低于3秒
+- ~~2.文件最短时长不低于3秒~~  不再限制时长
 - 3.文件大小不超过9M
 - 4.支持的audio转换类型：
   - audio/x-ms-wma 不支持
   
-### 涉及文件
+### 处理逻辑
 
-- EncoderOgg.js
-- recorder.js
-- encoderWorker.js
-- encoderWorker.wasm
+> 前端实现录音有两种方式，一种是使用MediaRecorder，另一种是使用WebRTC的getUserMedia结合AudioContext。这里我们使用AudioContext处理。
+
+- 1.添加一个file input用于文件上传，当用户选择文件后会触发onchange事件，在onchange回调里面就可以拿到文件的内容进行处理
+- 2.使用一个FileReader读取文件，读取为ArrayBuffer即原始的二进制内容
+- 3.拿到ArrayBuffer之后，使用AudioContext的decodeAudioData进行解码，生成一个AudioBuffer实例，把它做为AudioBufferSourceNode对象的buffer属性，
+```js
+// 解码后的audioBuffer包括音频时长，声道数量和采样率。
+fileReader.onload = function () {
+    let buffer = this.result
+    audioCtx.decodeAudioData(buffer).then(function (decodedData) {
+        console.log('upload file duration: ' + decodedData.duration + '(s)')
+      // 创建一个新的AudioBufferSourceNode接口, 该接口可以通过AudioBuffer 对象来播放音频数据
+      bufferSource = audioCtx.createBufferSource()
+      bufferSource.buffer = decodedData
+      bufferSource.onended = bufferSourceOnEnded
+
+      // 创建一个媒体流的节点
+      let destination = audioCtx.createMediaStreamDestination()
+      recordingDuration = Math.min(data.duration, decodedData.duration)  // 文件总时长小于指定的录制时长时，以文件时长为主
+      // 更新录制时长
+      recorder.setRecordingDuration(recordingDuration)
+      bufferSource.connect(destination)
+      bufferSource.start()
+
+      // 创建一个新的 createMediaStreamSource 对象，将声音输入这个对像
+      mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
+      // 创建audioContext，开始处理声音数据
+      recorder.start(mediaStreamSource, recorderStopHandler)
+    }, function (error) {
+        console.warn('Error catch: ', error)
+      
+    })
+}
+```
+- 4.在scriptProcessorNode.onaudioprocess中以固定时间间隔返回处理数据。总数据时长达到设置时长时，停止recorder
+- 5.录制结束后，页面生成下载链接和audio在线播放链接
 
 ### 参数说明 
 
