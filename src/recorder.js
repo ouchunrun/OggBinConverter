@@ -32,6 +32,9 @@ let Recorder = function (config, data) {
 
   this.encodedSamplePosition = 0
   this.recoderOptions = data
+  this.stream = null
+  this.recordingDuration = config.recordingDuration || 30   // 指定录制时长，默认最大30秒
+  this.recorderStopHandler = null     // 停止record的回调处理函数
 }
 
 Recorder.ERROR_MESSAGE = {
@@ -76,6 +79,19 @@ Recorder.ERROR_MESSAGE = {
   }
 }
 
+/**
+ * 设置或更新目标录制时长
+ * @param duration
+ */
+Recorder.prototype.setRecordingDuration = function (duration){
+  if(!duration){
+    return
+  }
+
+  this.recordingDuration = duration
+  console.log('set recording duration, ' + duration)
+}
+
 // Static Methods
 Recorder.isRecordingSupported = function () {
   return AudioContext && window.WebAssembly
@@ -101,6 +117,10 @@ Recorder.prototype.clearStream = function () {
   }
 }
 
+/**
+ * 处理onaudioprocess获取到的buffer数据
+ * @param inputBuffer
+ */
 Recorder.prototype.encodeBuffers = function (inputBuffer) {
   if (this.state === 'recording') {
     let buffers = []
@@ -128,15 +148,39 @@ Recorder.prototype.initAudioContext = function (sourceNode) {
 }
 
 Recorder.prototype.initAudioGraph = function () {
+  let This = this
   // First buffer can contain old data. Don't encode it.
   this.encodeBuffers = function () {
     delete this.encodeBuffers
   }
-
+  <!--创建声音的缓存节点，createScriptProcessor方法的第二个和第三个参数指的是输入和输出都是声道数，第一个参数缓存大小，一般数值为1024,2048,4096，这里选用4096-->
   this.scriptProcessorNode = this.audioContext.createScriptProcessor(this.config.bufferLength, this.config.numberOfChannels, this.config.numberOfChannels)
   this.scriptProcessorNode.connect(this.audioContext.destination)
+  // 此方法音频缓存，这里通过encodeBuffers方法进行缓存
+  let audioprocessCount = 0
+  let audioprocessDuration = 0
+  let audioprocessTotalDuration = 0
   this.scriptProcessorNode.onaudioprocess = (e) => {
+    if(!audioprocessDuration){
+      audioprocessDuration = e.inputBuffer.duration
+      console.log('get onaudioprocess trigger duration: ' + audioprocessDuration)
+    }
+    audioprocessCount++
     this.encodeBuffers(e.inputBuffer)
+
+    audioprocessTotalDuration = audioprocessCount * audioprocessDuration
+    if(audioprocessTotalDuration > This.recordingDuration){
+      console.log('process count: ', audioprocessCount)
+      console.log('audio process total duration: ', audioprocessTotalDuration)
+      if(This.recorderStopHandler){
+        This.recorderStopHandler({state: 'stop'})
+      }
+    }else {
+      if(This.recorderStopHandler){
+        // 返回当前时长，计算处理进度
+        This.recorderStopHandler({state: 'running', totalDuration: audioprocessTotalDuration})
+      }
+    }
   }
 
   this.monitorGainNode = this.audioContext.createGain()
@@ -239,8 +283,9 @@ Recorder.prototype.setMonitorGain = function (gain) {
   }
 }
 
-Recorder.prototype.start = function (sourceNode) {
+Recorder.prototype.start = function (sourceNode, recorderStopHandler) {
   if (this.state === 'inactive') {
+    this.recorderStopHandler = recorderStopHandler
     this.initAudioContext(sourceNode)
     this.initAudioGraph()
 

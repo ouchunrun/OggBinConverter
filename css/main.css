@@ -90,3 +90,15 @@ body {
     overflow-x: auto;
     font-size: 12px;
 }
+
+#clickToUpload{
+    width: 100%;
+    height: 35px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    background: #2d65e7;
+    background: linear-gradient(180deg,#5689ff,#2d65e7);
+    color: #fff;
+}

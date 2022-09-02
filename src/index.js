@@ -1,12 +1,18 @@
 
 let player = document.querySelector('#player');
-let link = document.querySelector('#link');
+let recorderLists = document.querySelector('#recorderLists');
 let uploadFile = document.getElementById('uploadFile')
 const recordingDurationInput = document.querySelector('div#recordingDuration input');
+let progressShow = document.getElementById('progress')
+let clickToUpload = document.getElementById('clickToUpload')
+clickToUpload.onclick = function (){
+    console.log('Trigger the real file upload button')
+    uploadFile.click()
+}
 
 recordingDurationInput.onchange = function (e){
     const span = e.target.parentElement.querySelector('span');
-    span.textContent = parseInt(e.target.value) - 2;
+    span.textContent = parseInt(e.target.value);
 }
 
 /**
@@ -18,8 +24,12 @@ uploadFile.onchange = function () {
     logPrint('file reade onload...')
     logPrint('Recorder started')
 
+    // 清除生成的页面记录
+    player.src = null
+    progressShow.innerHTML = ''
+
     let duration = recordingDurationInput.value || 30
-    logPrint('Recorder duration has been set to ' + (duration-2))
+    logPrint('Recorder duration has been set to ' + duration)
     encoderOgg({
         file: this.files[0],
         duration: duration,   // 文件录制时长
@@ -28,12 +38,12 @@ uploadFile.onchange = function () {
         numberOfChannels: 1,
         encoderSampleRate: 16000,
         encoderWorkerPath: './to-ogg-worker/encoderWorker.js',
+
         /**
          * 进度处理
          * @param data
          */
         progressCallback: function (data){
-            let progressShow = document.getElementById('progress')
             if(data.state === 'recording'){
                 progressShow.innerHTML = Math.round(data.percent * 100);
             }else if(data.state === 'done'){
@@ -49,11 +59,14 @@ uploadFile.onchange = function () {
          */
         doneCallBack:function (file, blob){
             let dataBlob = new Blob([blob], {type: 'audio/ogg'});
+            let downLoadLink = document.createElement('a')
             let url = URL.createObjectURL(dataBlob);
-            link.href = url;
-            link.download = file.name;
-            link.innerHTML = link.download;
             player.src = url;
+            // 生成下载链接
+            downLoadLink.href = url;
+            downLoadLink.download = file.name;
+            downLoadLink.innerHTML = '<br>' + '[' + new Date().toLocaleString() + '] '+ file.name
+            recorderLists.appendChild(downLoadLink)
             logPrint('download link generated!')
         },
         /**
@@ -67,6 +80,7 @@ uploadFile.onchange = function () {
     })
     uploadFile.value = "";  // clear input
 };
+
 
 /*******************************************************************************
  * Debug helpers

@@ -11,7 +11,7 @@ function createRecorder (data) {
         numberOfChannels: data.numberOfChannels || 1,
         encoderSampleRate: data.encoderSampleRate || 16000,
         originalSampleRateOverride: data.encoderSampleRate || 16000,
-        recordingDuration: data.recordingDuration || 30000,
+        recordingDuration: data.duration || 30000,
         encoderPath: data.encoderWorkerPath || 'encoderWorker.js'
     }
     mediaRecorder = new Recorder(options, data)
@@ -88,13 +88,11 @@ function encoderOgg (data) {
     }
 
     let recorder
-    let MIN_LIMIT = 3 // 文件时长不低于3秒
     let MXA_LIMIT = 9 * 1024 * 1024 // 文件大小要求不超过9M
     if (file.size > MXA_LIMIT) {
         data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1004)
         return
     }
-    let durationInterval
     let bufferSource
     let mediaStreamSource
     let recordingDuration
@@ -106,28 +104,26 @@ function encoderOgg (data) {
      */
     function bufferSourceOnEnded () {
         if (recorder.state === 'recording' || recorder.state !== 'inactive') {
+            console.log('buffer source onEnded!')
             recorder.stop()
             bufferSource && bufferSource.stop()
             bufferSource = null
-            if (durationInterval) {
-                clearInterval(durationInterval)
-                data.progressCallback({ state: 'done', percent: 1 })
-            }
+            data.progressCallback({ state: 'done', percent: 1 })
         }
     }
 
     /**
      * 录制时间到达设置时长时，停止录制
      */
-    function recorderStopHandler () {
+    function recorderStopHandler (res) {
         try {
-            let currentTime = mediaStreamSource.context.currentTime
-            if (currentTime > recordingDuration) {
+            let currentTime = res.totalDuration
+            if (res.state === 'stop') {
+                console.log('recorder.stop')
                 data.progressCallback({ state: 'done', percent: 1 })
                 recorder.stop()
                 bufferSource && bufferSource.stop()
                 bufferSource = null
-                clearInterval(durationInterval)
             } else {
                 data.progressCallback({ state: 'recording', percent: currentTime / recordingDuration })
             }
@@ -150,15 +146,16 @@ function encoderOgg (data) {
 
             // 创建一个媒体流的节点
             let destination = audioCtx.createMediaStreamDestination()
-            recordingDuration = Math.min(data.duration || 30) // 文件录制时长
+            recordingDuration = Math.min(data.duration, decodedData.duration)  // 文件总时长小于指定的录制时长时，以文件时长为主
+            // 更新录制时长
+            recorder.setRecordingDuration(recordingDuration)
             bufferSource.connect(destination)
-            bufferSource.start()
+            bufferSource.start(0)  // 从0秒开始播放
 
-            // 创建一个新的MediaStreamAudioSourceNode 对象
+            // 创建一个新的MediaStreamAudioSourceNode 对象，将声音输入这个对像
             mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
-            durationInterval = setInterval(recorderStopHandler, 500)
-
-            recorder.start(mediaStreamSource)
+            // 创建audioContext，开始处理声音数据
+            recorder.start(mediaStreamSource, recorderStopHandler)
         } catch (e) {
             data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(e))
         }
@@ -168,12 +165,7 @@ function encoderOgg (data) {
         fileReader.onload = function () {
             let buffer = this.result
             audioCtx.decodeAudioData(buffer).then(function (decodedData) {
-                let duration = decodedData.duration
-                if (duration < MIN_LIMIT) {
-                    data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1005)
-                    return
-                }
-
+                console.log('upload file duration: ' + decodedData.duration + '(s)')
                 createSourceNode(decodedData)
             }, function (error) {
                 console.warn('Error catch: ', error)

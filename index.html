@@ -27,39 +27,44 @@
     </div>
 </section>
 
-<!--设置录制时长-->
-<section class="duration card">
+<!--file upload-->
+<section class="controller card">
+    <!--  设置录制时长  -->
     <header>
-        <h3>Set recording duration</h3>
+        <h3>Recording duration</h3>
     </header>
     <div id="recordingDuration">
         <label>Duration <span>30</span> (second):</label>
-        <input type="range" min="3" max="32" value="32">
+        <input type="range" min="1" max="30" value="30">
     </div>
-</section>
 
-<!--file upload-->
-<section class="controller card">
+    <!--  文件上传  -->
     <header>
         <h3>File upload</h3>
     </header>
     <div>
-        <input type="file" class="localShare" id="uploadFile" style="display: block;" />
+        <div>
+            <button id="clickToUpload">Click here to upload files</button>
+            <input type="file" class="localShare" id="uploadFile" style="display: none;" />
+        </div>
         <div>
             Conversion progress: <span id="progress">0</span>(%)
         </div>
     </div>
-</section>
 
-<!-- converted file -->
-<section class="player card">
+    <!--  转换的文件在线播放  -->
     <header>
-        <h3>Converted file</h3>
+        <h3>Recording player</h3>
     </header>
     <div>
-        <audio id="player" controls autoplay></audio>
+        <audio id="player" controls></audio>
     </div>
-    <div><a id="link">Download Link</a></div>
+
+    <!-- 转换文件列表 -->
+    <header>
+        <h3>Converted lists</h3>
+    </header>
+    <div id="recorderLists"></div>
 </section>
 
 <section class="console card">
