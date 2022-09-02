@@ -88,6 +88,7 @@ function encoderOgg (data) {
     }
 
     let recorder
+    let MIN_LIMIT = 3 // 文件时长不低于3秒
     let MXA_LIMIT = 9 * 1024 * 1024 // 文件大小要求不超过9M
     if (file.size > MXA_LIMIT) {
         data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1004)
@@ -165,6 +166,12 @@ function encoderOgg (data) {
         fileReader.onload = function () {
             let buffer = this.result
             audioCtx.decodeAudioData(buffer).then(function (decodedData) {
+                let duration = decodedData.duration
+                if (duration < MIN_LIMIT) {
+                    data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1005)
+                    return
+                }
+
                 console.log('upload file duration: ' + decodedData.duration + '(s)')
                 createSourceNode(decodedData)
             }, function (error) {
