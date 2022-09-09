@@ -18,10 +18,10 @@
 ### 转换格式与限制
 
 - 1.音频文件转换为ogg格式文件，采样率 16K， 单声道
-- ~~2.文件最短时长不低于3秒~~  不再限制时长
-- 3.文件大小不超过9M
-- 4.支持的audio转换类型：
-  - audio/x-ms-wma 不支持
+- ~~2.上传文件大小不超过`9M`~~   [暂不限制文件大小]
+- 3.转换后的最好不超过`192KB`。超过的话我们的设备会拒绝下载这个文件，这样的话客户就用不了
+- 4.支持的转换格式随浏览器的能力来，不同浏览器还有些差别
+- 5.支持勾选音频是否淡出
   
 ### 处理逻辑
 
@@ -103,6 +103,36 @@ fileInput.onchange = function () {
     fileInput.value = "";  // clear input
 };
 ``` 
+
+### 问题记录
+
+- 1.录制时长不等于指定录制时长问题
+  - 原因：通话定时器计算处理时长，start 过后，并不一定会立即进入录音状态，最后的数据时长不一定和定时时间匹配
+  - 处理：scriptProcessorNode.onaudioprocess 以固定时间间隔触发，总触发次数不定。需要计算总次数*固定时间才是录制的时长
+```
+this.scriptProcessorNode.onaudioprocess = (e) => {
+  if(!audioprocessDuration){
+    audioprocessDuration = e.inputBuffer.duration
+    console.log('get onaudioprocess trigger duration: ' + audioprocessDuration)
+  }
+  audioprocessCount++
+  this.encodeBuffers(e.inputBuffer)
+
+  audioprocessTotalDuration = audioprocessCount * audioprocessDuration
+  if(audioprocessTotalDuration > This.recordingDuration){
+    console.log('process count: ', audioprocessCount)
+    console.log('audio process total duration: ', audioprocessTotalDuration)
+    if(This.recorderStopHandler){
+      This.recorderStopHandler({state: 'stop'})
+    }
+  }else {
+    if(This.recorderStopHandler){
+      // 返回当前时长，计算处理进度
+      This.recorderStopHandler({state: 'running', totalDuration: audioprocessTotalDuration})
+    }
+  }
+}
+```  
 
 ### 参考
 

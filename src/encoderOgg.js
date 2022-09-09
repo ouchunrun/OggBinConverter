@@ -89,11 +89,11 @@ function encoderOgg (data) {
 
     let recorder
     let MIN_LIMIT = 3 // 文件时长不低于3秒
-    let MXA_LIMIT = 9 * 1024 * 1024 // 文件大小要求不超过9M
-    if (file.size > MXA_LIMIT) {
-        data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1004)
-        return
-    }
+    // let MXA_LIMIT = 9 * 1024 * 1024 // 文件大小要求不超过9M
+    // if (file.size > MXA_LIMIT) {
+    //     data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1004)
+    //     return
+    // }
     let bufferSource
     let mediaStreamSource
     let recordingDuration
@@ -147,7 +147,7 @@ function encoderOgg (data) {
 
             // 创建一个媒体流的节点
             let destination = audioCtx.createMediaStreamDestination()
-            recordingDuration = Math.min(data.duration, decodedData.duration)  // 文件总时长小于指定的录制时长时，以文件时长为主
+            recordingDuration = Math.min(data.duration, decodedData.duration) // 文件总时长小于指定的录制时长时，以文件时长为主
             // 更新录制时长
             recorder.setRecordingDuration(recordingDuration)
             bufferSource.connect(destination)

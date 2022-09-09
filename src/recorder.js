@@ -35,6 +35,8 @@ let Recorder = function (config, data) {
   this.stream = null
   this.recordingDuration = config.recordingDuration || 30   // 指定录制时长，默认最大30秒
   this.recorderStopHandler = null     // 停止record的回调处理函数
+  this.gainFadeOut = false            // 是否设置渐弱
+  this.gainFadeOutTime = this.recordingDuration * 0.15            // 音频渐弱时间
 }
 
 Recorder.ERROR_MESSAGE = {
@@ -89,6 +91,7 @@ Recorder.prototype.setRecordingDuration = function (duration){
   }
 
   this.recordingDuration = duration
+  this.gainFadeOutTime = this.recordingDuration * 0.15
   console.log('set recording duration, ' + duration)
 }
 
@@ -160,6 +163,7 @@ Recorder.prototype.initAudioGraph = function () {
   let audioprocessCount = 0
   let audioprocessDuration = 0
   let audioprocessTotalDuration = 0
+
   this.scriptProcessorNode.onaudioprocess = (e) => {
     if(!audioprocessDuration){
       audioprocessDuration = e.inputBuffer.duration
@@ -169,16 +173,21 @@ Recorder.prototype.initAudioGraph = function () {
     this.encodeBuffers(e.inputBuffer)
 
     audioprocessTotalDuration = audioprocessCount * audioprocessDuration
-    if(audioprocessTotalDuration > This.recordingDuration){
+    let timeLeft = This.recordingDuration - audioprocessTotalDuration
+    if (timeLeft > 0) {
+      if(This.recorderStopHandler){
+        This.recorderStopHandler({ state: 'running', totalDuration: audioprocessTotalDuration })
+      }
+
+      if (timeLeft <= This.gainFadeOutTime && !This.gainFadeOut) {
+        This.setRecordingGainFadeOut(timeLeft)
+        This.gainFadeOut = true
+      }
+    } else {
       console.log('process count: ', audioprocessCount)
       console.log('audio process total duration: ', audioprocessTotalDuration)
       if(This.recorderStopHandler){
-        This.recorderStopHandler({state: 'stop'})
-      }
-    }else {
-      if(This.recorderStopHandler){
-        // 返回当前时长，计算处理进度
-        This.recorderStopHandler({state: 'running', totalDuration: audioprocessTotalDuration})
+        This.recorderStopHandler({ state: 'stop' })
       }
     }
   }
@@ -264,6 +273,22 @@ Recorder.prototype.resume = function () {
   if (this.state === 'paused') {
     this.state = 'recording'
     this.onresume()
+  }
+}
+
+/**
+ * 声音渐弱处理
+ */
+Recorder.prototype.setRecordingGainFadeOut = function (timeLeft){
+  console.log('set recording gain fade out, time left ' + timeLeft)
+  if (this.recordingGainNode && this.audioContext) {
+    this.recordingGainNode.gain.setValueAtTime(1, this.audioContext.currentTime)
+
+    // 1.值的逐渐指数变化。更改从为上一个事件指定的时间开始，然后按照指数上升到 value 参数中给定的新值，并在 endTime 参数中给定的时间达到新值。
+    // this.recordingGainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + timeLeft)
+
+    // 2.值的逐渐线性变化。更改从为上一个事件指定的时间开始，然后线性增加到 value 参数中给定的新值，并在 endTime 参数中给定的时间达到新值。
+    this.recordingGainNode.gain.linearRampToValueAtTime(0.01, this.audioContext.currentTime + timeLeft)
   }
 }
 
