@@ -35,7 +35,8 @@ let Recorder = function (config, data) {
   this.stream = null
   this.recordingDuration = config.recordingDuration || 30   // 指定录制时长，默认最大30秒
   this.recorderStopHandler = null     // 停止record的回调处理函数
-  this.gainFadeOut = false            // 是否设置渐弱
+  this.fadeOutEnabled = data.audioFadeOut
+  this.fadeOutBeenSet = false            // 是否设置渐弱 已设置
   this.gainFadeOutTime = this.recordingDuration * 0.15            // 音频渐弱时间
 }
 
@@ -179,16 +180,16 @@ Recorder.prototype.initAudioGraph = function () {
         This.recorderStopHandler({ state: 'running', totalDuration: audioprocessTotalDuration })
       }
 
-      if (timeLeft <= This.gainFadeOutTime && !This.gainFadeOut) {
+      if (This.fadeOutEnabled && !This.fadeOutBeenSet && timeLeft <= This.gainFadeOutTime) {
+        console.log('set audio fade out')
         This.setRecordingGainFadeOut(timeLeft)
-        This.gainFadeOut = true
+        This.fadeOutBeenSet = true
       }
     } else {
+      console.log('process count: ', audioprocessCount)
+      console.log('audio process total duration: ', audioprocessTotalDuration)
       if(This.recorderStopHandler){
-        console.log('process count: ', audioprocessCount)
-        console.log('audio process total duration: ', audioprocessTotalDuration)
         This.recorderStopHandler({ state: 'stop' })
-        This.recorderStopHandler = null
       }
     }
   }

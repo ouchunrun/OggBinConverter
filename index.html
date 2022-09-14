@@ -23,14 +23,17 @@
         <div class="uploadedFile">
             <div class="left">
                 <div class="audioFileIcon"></div>
-                <span class="fileName"></span>
+                <span class="fileName">久石譲 - “天空の城ラピュタ”~君をのせて.mp3</span>
             </div>
 
             <div class="right">
                 <div class="duration">
                     <label>Recording duration</label>
                     <input type="range" min="1" max="30" value="30">
-                    <label><span class="durationShow">30</span>s</label>
+                    <span class="durationShow">30</span>s
+
+                    <label>| Audio fade out</label>
+                    <input id="audioFadeOut" type="checkbox" value="" checked />
                 </div>
                 <div id="player">
                     <audio controls="" src=""></audio>

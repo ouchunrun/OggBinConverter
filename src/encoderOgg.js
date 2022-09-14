@@ -33,7 +33,7 @@ function createRecorder (data) {
     }
 
     mediaRecorder.ondataavailable = function (blob) {
-        console.log('Data ondataavailable received')
+        console.warn('Data ondataavailable received')
         mediaRecorder.recoderOptions.doneCallBack(new File([blob], `${mediaRecorder.fileName}.ogg`, {
             type: 'audio/ogg;codecs=opus'
         }), blob)

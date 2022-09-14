@@ -13,6 +13,7 @@ let fileWitchButton = document.getElementById('fileWitch')
 
 let recordingDurationInput = document.querySelector('div.duration > input[type=range]')
 let switchProcess = document.getElementById('progress')
+let audioFadeOut = document.getElementById('audioFadeOut')
 let durationSelect = document.querySelector('div.duration')
 let recorderPlayer = document.getElementById('player')
 
@@ -39,7 +40,6 @@ recordingDurationInput.onchange = function (e){
 function fileOnChange(file){
     if(file){
         console.log('upload file: ', file.name)
-        consoleLogPrint('upload file: ' + file.name)
         uploadFile = file
 
         // 显示上传的文件名和文件duration设置
@@ -67,15 +67,20 @@ fileWitchButton.onclick = function (){
         fileWitchButton.style.opacity = '0.6'
         fileWitchButton.disabled = true
         recordingDurationInput.disabled = true
+        audioFadeOut.disabled = true
 
         // 转换
         let duration = recordingDurationInput.value
-        consoleLogPrint('Recorder duration has been set to ' + duration)
-        console.log('Start file conversion: ', uploadFile.name)
+        consoleLogPrint('start file conversion ==> ' + uploadFile.name)
+        console.log('start file conversion: ', uploadFile.name)
+        consoleLogPrint('recorder duration ' + duration)
+        console.log('audio fade out enabled ', audioFadeOut.checked)
+        consoleLogPrint('audio fade out enabled ' + audioFadeOut.checked)
 
         encoderOgg({
             file: uploadFile,
             duration: duration,   // 文件录制时长
+            audioFadeOut: audioFadeOut.checked,
             monitorGain: 0,
             recordingGain: 1,
             numberOfChannels: 1,
@@ -93,15 +98,10 @@ fileWitchButton.onclick = function (){
                     switchProcess.style.width = '100%'
                     console.log('recorder complete!')
                     consoleLogPrint('Recorder complete!')
-
-                    tip.style.opacity = '1'
-                    setTimeout(function (){
-                        tip.style.opacity = '0'
-                    }, 5000)
                 }
             },
             /**
-             * 转换完成后的处理
+             * 转换完成后的处理，mediaRecorder.ondataavailable 返回
              * @param file
              * @param blob
              */
@@ -109,6 +109,12 @@ fileWitchButton.onclick = function (){
                 // 隐藏duration选择，显示audio播放器
                 durationSelect.style.display = 'none'
                 recorderPlayer.style.display = 'block'
+
+                tip.style.opacity = '1'
+                setTimeout(function (){
+                    tip.style.opacity = '0'
+                }, 5000)
+                consoleLogPrint('recorder ondataavailable received!')
 
                 let dataBlob = new Blob([blob], {type: 'audio/ogg'});
                 let url = URL.createObjectURL(dataBlob)

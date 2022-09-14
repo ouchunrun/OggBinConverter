@@ -1,7 +1,7 @@
 body{
     margin: 0 auto;
     width: 55%;
-    min-width: 800px;
+    min-width: 950px;
 }
 button:hover{
     cursor:pointer;
@@ -136,12 +136,19 @@ button{
     text-align: right;
 }
 input:disabled{
-    border:1px solid #DDD;
-    background-color:#F5F5F5;
-    color:#ACA899;
+    /*border:1px solid #DDD;*/
+    /*background-color:#F5F5F5;*/
+    /*color:#ACA899;*/
+    opacity: 0.5;
 }
-.duration input{
+.duration input[type="range"]{
     vertical-align: middle;
+}
+.duration label{
+    font-weight: bold;
+}
+#audioFadeOut{
+    vertical-align: baseline;
 }
 #progress{
     height: 5px;
