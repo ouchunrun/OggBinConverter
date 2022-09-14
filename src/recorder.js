@@ -184,10 +184,11 @@ Recorder.prototype.initAudioGraph = function () {
         This.gainFadeOut = true
       }
     } else {
-      console.log('process count: ', audioprocessCount)
-      console.log('audio process total duration: ', audioprocessTotalDuration)
       if(This.recorderStopHandler){
+        console.log('process count: ', audioprocessCount)
+        console.log('audio process total duration: ', audioprocessTotalDuration)
         This.recorderStopHandler({ state: 'stop' })
+        This.recorderStopHandler = null
       }
     }
   }
