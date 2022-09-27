@@ -122,7 +122,7 @@ fileWitchButton.onclick = function (){
                 }, 5000)
                 consoleLogPrint('recorder ondataavailable received!')
 
-                let dataBlob = new Blob([blob], {type: 'audio/ogg'});
+                let dataBlob = new Blob([blob], {type: `audio/${outputFormat}`});
                 let url = URL.createObjectURL(dataBlob)
                 let audioPlayer = document.querySelector("#player > audio")
                 audioPlayer.src = url;
