@@ -85,7 +85,7 @@ fileWitchButton.onclick = function (){
             recordingGain: 1,
             numberOfChannels: 1,
             encoderSampleRate: 16000,
-            encoderWorkerPath: './to-ogg-worker/encoderWorker.js',
+            encoderWorkerPath: './toOgg/encoderWorker.js',
 
             /**
              * 进度处理
