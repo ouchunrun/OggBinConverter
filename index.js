@@ -11,11 +11,16 @@ let uploadFileInput = document.getElementById('uploadFile')
 let selectButton = document.getElementById('selectButton')
 let fileWitchButton = document.getElementById('fileWitch')
 
+let outputFormatSelect = document.getElementById('outputFormat')
 let recordingDurationInput = document.querySelector('div.duration > input[type=range]')
 let switchProcess = document.getElementById('progress')
 let audioFadeOut = document.getElementById('audioFadeOut')
 let durationSelect = document.querySelector('div.duration')
 let recorderPlayer = document.getElementById('player')
+
+outputFormatSelect.onchange = function (){
+    console.log('set output format:', outputFormatSelect.options[outputFormatSelect.selectedIndex].value)
+}
 
 selectButton.onclick = function (){
     console.log('Trigger the real file upload button')
@@ -76,16 +81,16 @@ fileWitchButton.onclick = function (){
         consoleLogPrint('recorder duration ' + duration)
         console.log('audio fade out enabled ', audioFadeOut.checked)
         consoleLogPrint('audio fade out enabled ' + audioFadeOut.checked)
+        let outputFormat = outputFormatSelect.options[outputFormatSelect.selectedIndex].value
+        console.log('outputFormat:', outputFormat)
 
-        encoderOgg({
+        encoder({
             file: uploadFile,
             duration: duration,   // 文件录制时长
+            encoderType: outputFormat,
             audioFadeOut: audioFadeOut.checked,
-            monitorGain: 0,
-            recordingGain: 1,
-            numberOfChannels: 1,
-            encoderSampleRate: 16000,
-            encoderWorkerPath: './toOgg/encoderWorker.js',
+            desiredSampleRate: outputFormat === 'ogg' ? 16000 : 8000,    // Desired encoding sample rate. Audio will be resampled
+            encoderWorkerPath: outputFormat === 'ogg' ? './toOgg/oggOpusEncoderWorker.js' : './toWave/waveEncoderWorker.js',
 
             /**
              * 进度处理

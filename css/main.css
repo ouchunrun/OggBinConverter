@@ -111,7 +111,7 @@ button{
     padding: 0 20px;
 }
 .left{
-    width: 50%;
+    width: 30%;
     float: left;
     text-align: left;
     height: 90px;
@@ -128,12 +128,39 @@ button{
     background-position: center;
     background-repeat: no-repeat;
     background-size: 45px;
+    cursor: pointer;
+}
+.fileName{
+    width: 200px;
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
 }
 .right{
-    width: 50%;
+    width: 70%;
     float: right;
     line-height: 90px;
     text-align: right;
+}
+#outputFormat{
+    width: 70px;
+    height: 25px;
+    background-color: #ffffff;
+    border: solid 1px #dcdcdc;
+    font-family: Roboto;
+    font-size: 14px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    letter-spacing: normal;
+    text-align: left;
+    color: #3d3d3d;
+    padding-left: 10px;
+    border-color: #cfcfcf;
+    -webkit-appearance: none;
+    outline: none;
 }
 input:disabled{
     /*border:1px solid #DDD;*/
@@ -143,6 +170,7 @@ input:disabled{
 }
 .duration input[type="range"]{
     vertical-align: middle;
+    width: 80px;
 }
 .duration label{
     font-weight: bold;

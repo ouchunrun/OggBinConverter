@@ -88,11 +88,11 @@ fileReader.onload = function () {
  */
 let fileInput = document.getElementById('fileInput')
 fileInput.onchange = function () {
-    encoderOgg({
+    encoder({
         file: this.files[0],
         duration: 30,
         progressCallback: progressCallback,
-        doneCallBack:doneCallBack,
+        doneCallBack: doneCallBack,
         errorCallBack: errorCallBack,
         monitorGain: parseInt(monitorGain.value, 10),
         recordingGain: parseInt(recordingGain.value, 10),
