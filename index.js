@@ -73,6 +73,7 @@ fileWitchButton.onclick = function (){
         fileWitchButton.disabled = true
         recordingDurationInput.disabled = true
         audioFadeOut.disabled = true
+        outputFormatSelect.disabled = true
 
         // 转换
         let duration = recordingDurationInput.value
