@@ -61,24 +61,14 @@ fileReader.onload = function () {
 ```
 - 4.在scriptProcessorNode.onaudioprocess中以固定时间间隔返回处理数据。总数据时长达到设置时长时，停止recorder
 - 5.录制结束后，页面生成下载链接和audio在线播放链接
+ 
+### bin 文件转换大小限制与音频渐弱处理说明
 
-### 参数说明 
+1.worker 收到buffer数据后保存并立即对数据进行扁平化和下采样处理
+2.当处理后的数据剩余最大尺寸的百分之十五时，通知recorder开始设置音频渐弱
+3.当处理后的数据大于限制尺寸时，通知recorder停止转换，生成最终文件。超出尺寸限制的文件转换时长小于页面设置时长。
+4.若转换的文件未超出尺寸限制，则根据转换时间设置音频渐弱时间。剩余转换时长小于recordingDuration*0.15时，设置渐弱。
 
-- file：上传文件
-- duration： 文件录制时长，单位（秒）
-- progressCallback 回调参数
-    - state："done" 表示转换结束， "recording" 表示还在处理中
-    - percent： 转换进度
-
-- doneCallBack  文件转换完成的回调
-- errorCallBack： 错误回调
-- numberOfChannels：声道，默认1
-- encoderSampleRate：采样率： 默认16K
-- encoderWorkerPath： encoderWorker.js 路径
-- OggOpusEncoderWasmPath：wasm 路径
-- monitorGain：可选，默认0
-- recordingGain：可选，默认1，
-   
 ### 调用示例：
 
 ```javascript

@@ -58,6 +58,24 @@ function fileOnChange(file){
     }
 }
 
+function formatFileSize(fileSize){
+    if (fileSize < 1024) {
+        return fileSize + ' B';
+    } else if (fileSize < (1024*1024)) {
+        let temp = fileSize / 1024;
+        temp = temp.toFixed(2);
+        return temp + ' KB';
+    } else if (fileSize < (1024*1024*1024)) {
+        let temp = fileSize / (1024*1024);
+        temp = temp.toFixed(2);
+        return temp + ' MB';
+    } else {
+        let temp = fileSize / (1024*1024*1024);
+        temp = temp.toFixed(2);
+        return temp + ' GB';
+    }
+}
+
 /**
  * 文件转换
  */
@@ -103,6 +121,10 @@ fileWitchButton.onclick = function (){
                 }else if(data.state === 'done'){
                     switchProcess.style.width = '100%'
                     console.log('recorder complete!')
+                    if(data.fileExceedsLimit){
+                        console.log('Due to file size limitations, the conversion time did not reach the recording duration.')
+                        consoleLogPrint('Due to file size limitations, the conversion time did not reach the recording duration.')
+                    }
                     consoleLogPrint('Recorder complete!')
                 }
             },
@@ -128,6 +150,7 @@ fileWitchButton.onclick = function (){
                 audioPlayer.src = url;
 
                 // 生成下载链接
+                console.warn('file size:', formatFileSize(file.size))
                 let downLoadLink = document.createElement('a')
                 downLoadLink.id = 'fileDownloadLink'
                 downLoadLink.href = url;
