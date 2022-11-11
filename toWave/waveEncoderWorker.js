@@ -43,6 +43,7 @@ WaveWorker.prototype.init = function (config){
     this.numberOfChannels = config.numberOfChannels || 1
     this.bitsPerSample = config.bitsPerSample || 16
     this.fileSizeLimit = config.fileSizeLimit || false
+    this.encoderType = config.encoderType
 
     this.initBuffers()
 }
@@ -248,6 +249,7 @@ WaveWorker.prototype.writeString = function (view, offset, string) {
  * @returns {DataView}
  */
 WaveWorker.prototype.encodeWAV = function (samples){
+    console.warn('encode wave')
     let fileHeaderOfferSet = 44   // 头文件长度
     /* 自定义文件头长度 */
     fileHeaderOfferSet +=8        // ring.bin, Filed size 8
@@ -318,6 +320,7 @@ WaveWorker.prototype.encodeWAV = function (samples){
  * @returns {DataView}
  */
 WaveWorker.prototype.encodeGRPBin = function (samples){
+    console.warn('encode grp bin')
     let fileHeaderOfferSet = 512   // 1.bin文件整个头是固定 512 字节的
     let buffer = new ArrayBuffer(fileHeaderOfferSet + samples.length * 2)
     let view = new DataView(buffer)
@@ -396,9 +399,12 @@ WaveWorker.prototype.exportWAV = function (){
     }
 
     // 3.添加文件头
-    let dataView = this.encodeWAV(downSampledBuffer)
-    // 处理GRP 生成bin文件
-    // let dataView = this.encodeGRPBin(downSampledBuffer)
+    let dataView
+    if(this.encoderType === 'bin'){
+        dataView = this.encodeGRPBin(downSampledBuffer)
+    }else {
+        dataView = this.encodeWAV(downSampledBuffer)
+    }
 
     self.postMessage({
         message: 'done',
