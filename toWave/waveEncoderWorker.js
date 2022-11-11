@@ -313,6 +313,72 @@ WaveWorker.prototype.encodeWAV = function (samples){
 }
 
 /**
+ * GRP .bin 格式文件
+ * @param samples
+ * @returns {DataView}
+ */
+WaveWorker.prototype.encodeGRPBin = function (samples){
+    let fileHeaderOfferSet = 512   // 1.bin文件整个头是固定 512 字节的
+    let buffer = new ArrayBuffer(fileHeaderOfferSet + samples.length * 2)
+    let view = new DataView(buffer)
+
+    /**
+     *    .bin文件里都是用的大端模式
+     *    filesize 从 0 开始，占4字节； （uint32类型的值：对应的值=文件属性->大小->字节/2）
+     *    check_sum 从 4 开始，占2字节； （unit 16类型的值，每两个字节按照unit16相加）
+     *    version 从 6 开始，占 4 字节； （默认设置为1）
+     *    ring.bin 从 16 开始，占8个字节
+     */
+    // (1) filesize 从 0 开始，占4字节； （uint32类型的值)
+    let file_size = (view.byteLength) / 2   // filesize = byteLength / 2
+    // littleEndian 参数：指示 32 位 int 是以小端格式还是大端格式存储。如果为 false 或未定义，则写入大端值。
+    view.setUint32(0, file_size, false)
+
+    // (2) check_sum 从 4 开始，占2字节； （unit 16类型的值）默认先写入0
+    let check_sum = 0
+    view.setUint16(4, check_sum, false)
+
+    // (3) version 从 6 开始，占 4 字节； （版本默认设置为1）
+    let version = 1
+    view.setUint8(6, version)
+
+    // (4) 年、月、日、时、分 从 10 开始，占 6 字节
+    let myDate = new Date()
+    view.setUint16(10, myDate.getFullYear(), false)      // 年, 从10开始，占 2 字节
+    view.setUint8(12, myDate.getMonth(), false)      // 月, 占 1 字节  （getMonth() 获取当前月份(0-11,0代表1月)）
+    view.setUint8(13, myDate.getDate(), false)       // 日, 占 1 字节
+    view.setUint8(14, myDate.getHours(), false)      // 时, 占 1 字节
+    view.setUint8(15, myDate.getMinutes(), false)    // 分, 占 1 字节
+
+    // (5) ring.bin 从 16 开始，占8个字节 (Uint8类型值)
+    this.writeString(view, 16, 'ring.bin')
+    // 添加自定义文件头信息结束
+
+    /* 给wav头增加pcm体 */
+    this.floatTo16BitPCM(view, fileHeaderOfferSet, samples)
+
+    /**
+     * （6）rewrite check_sum value
+     * 0x010000 转换为十进制 为 65536
+     * 累加值 = view 所有 字节按照 uint16 读取并累加
+     * check_sum = 65536 - 累加值
+     * */
+    for(let offset = 0; offset<view.byteLength; offset+=2){
+        check_sum = check_sum + view.getInt16(offset)
+    }
+    check_sum = 65536 - check_sum
+    view.setUint16(4, check_sum, false)
+
+    /**
+     * padding 部分好像没有必要处理：
+     *  一个字节为8 bit，每个没有值的bit位需要补齐为0。
+     *  DataView 的 length 为 512 + samples.length * 2（双字节）。
+     */
+    return view
+}
+
+
+/**
  * 生成导出数据
  */
 WaveWorker.prototype.exportWAV = function (){
@@ -321,16 +387,19 @@ WaveWorker.prototype.exportWAV = function (){
 
     // 2.计算文件尺寸是否超出限制
     let fileLimit = 196608
-    let fileHeaderOfferSetLength = 64
+    let fileHeaderOfferSetLength = 512  // 整个头是固定 512 字节的
     let totalFileLength = fileHeaderOfferSetLength + downSampledBuffer.length * 2
     let maxFileLength = fileLimit - fileHeaderOfferSetLength // 除去头文件长度，文件内容不超过192KB-64
     if(totalFileLength > maxFileLength){
-        console.warn('ring.bin尺寸要求不超过 196608 Byte(192KB)!')
         downSampledBuffer = downSampledBuffer.slice(0, maxFileLength/2)
+        console.warn('ring.bin尺寸要求不超过 196608 Byte(192KB): ', downSampledBuffer)
     }
 
     // 3.添加文件头
     let dataView = this.encodeWAV(downSampledBuffer)
+    // 处理GRP 生成bin文件
+    // let dataView = this.encodeGRPBin(downSampledBuffer)
+
     self.postMessage({
         message: 'done',
         data: dataView
