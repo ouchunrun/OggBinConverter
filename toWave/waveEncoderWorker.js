@@ -274,8 +274,14 @@ WaveWorker.prototype.encodeWAV = function (samples){
     this.writeString(view, 12, 'fmt ')
     /* format chunk length */
     view.setUint32(16, 16, true)
-    /* sample format (raw) */
-    view.setUint16(20, 1, true)
+    /**
+     * sample format (raw)
+     * AudioFormat=1 文件采用PCM编码(线性量化)。
+     * AudioFormat=2 Microsoft ADPCM
+     * AudioFormat=6 ITU G.711 a-law
+     * AudioFormat=7 ITU G.711 Âµ-law
+     */
+    view.setUint16(20, 7, true)
     /* channel count */
     view.setUint16(22, this.numberOfChannels, true)
     /* sample rate */
@@ -355,13 +361,21 @@ WaveWorker.prototype.encodeGRPBin = function (samples){
 
     // (5) ring.bin 从 16 开始，占8个字节 (Uint8类型值)
     this.writeString(view, 16, 'ring.bin')
+
+    /**
+     * (6) 编码器处理
+     * encoding 从 34 开始，占两个字节， uint 16 方式写入
+     * u-law 值为 0
+     */
+    // let ulawEncoding = 0
+    // view.setUint16(34, ulawEncoding, false)
     // 添加自定义文件头信息结束
 
     /* 给wav头增加pcm体 */
     this.floatTo16BitPCM(view, fileHeaderOfferSet, samples)
 
     /**
-     * （6）rewrite check_sum value
+     * （7）rewrite check_sum value
      * 0x010000 转换为十进制 为 65536
      * 累加值 = view 所有 字节按照 uint16 读取并累加
      * check_sum = 65536 - 累加值
@@ -373,7 +387,7 @@ WaveWorker.prototype.encodeGRPBin = function (samples){
     view.setUint16(4, check_sum, false)
 
     /**
-     * padding 部分好像没有必要处理：
+     * (8) padding 部分JS不需要处理：
      *  一个字节为8 bit，每个没有值的bit位需要补齐为0。
      *  DataView 的 length 为 512 + samples.length * 2（双字节）。
      */
@@ -395,7 +409,7 @@ WaveWorker.prototype.exportWAV = function (){
     let maxFileLength = fileLimit - fileHeaderOfferSetLength // 除去头文件长度，文件内容不超过192KB-64
     if(totalFileLength > maxFileLength){
         downSampledBuffer = downSampledBuffer.slice(0, maxFileLength/2)
-        console.warn('ring.bin尺寸要求不超过 196608 Byte(192KB): ', downSampledBuffer)
+        console.warn('ring.bin尺寸要求不超过 196608 Byte(192KB)!')
     }
 
     // 3.添加文件头
