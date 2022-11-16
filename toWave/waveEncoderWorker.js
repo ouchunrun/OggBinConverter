@@ -1,3 +1,8 @@
+try {
+    importScripts('alawmulaw.js')
+}catch (error){
+    console.error('import script error:', err)
+}
 
 let waveWorker
 self.onmessage = function (e) {
@@ -34,6 +39,8 @@ function WaveWorker(){
     this.fadeOutTime = false   // true 标识达到渐弱时间
     this.fadeOutRatio = 0.15   // 渐弱比例
     this.fileSizeLimit = false // 是否限制文件大小
+
+    this.alawmulaw = alawmulaw
 }
 
 WaveWorker.prototype.init = function (config){
@@ -165,6 +172,7 @@ WaveWorker.prototype.interleave = function (inputL, inputR) {
 
 /**
  * floatTo16bitPCM将音频设备采集的元素范围在[0,1]之间的Float32Array，转换成一个元素是16位有符号整数的Float32Array中
+ * 也就是将Float32Array转换成16bit PCM
  * @param output
  * @param offset
  * @param input
@@ -173,6 +181,34 @@ WaveWorker.prototype.floatTo16BitPCM = function (output, offset, input){
     for (let i = 0; i < input.length; i++, offset += 2) {
         let s = Math.max(-1, Math.min(1, input[i]));
         output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+}
+
+/**
+ *  mu-Law 编码
+ *  流程：
+ *      1.将createScriptProcessor获取到的Float32Array数据转换成线性16bit PCM
+ *      2.将线性16-bit PCM数据编码为8-bit mu-Law
+ *      3.数据写入output
+ * @param output DataView
+ * @param offset body体开始写入的偏移位置
+ * @param input Float32Array
+ */
+WaveWorker.prototype.float32To8BitMuLaw = function (output, offset, input){
+    console.warn('float32To8BitMuLaw!!')
+    /** (1)将Float32Array转换成16bit PCM!!!  */
+    let l6linearPCM = new Int16Array(input.length)
+    for (let i = 0; i < input.length; i++) {
+        let s = Math.max(-1, Math.min(1, input[i]))
+        l6linearPCM[i] =  s < 0 ? s * 0x8000 : s * 0x7FFF
+    }
+
+    /** (2)encode 16-bit values as 8-bit mu-Law with encode() */
+    let muLawSamples = this.alawmulaw.mulaw.encode(l6linearPCM)
+
+    /**(3)以uint8格式写入output*/
+    for (let i = 0; i < muLawSamples.length; i++, offset += 1) {
+        output.setUint8(offset, muLawSamples[i])
     }
 }
 
@@ -372,7 +408,7 @@ WaveWorker.prototype.encodeGRPBin = function (samples){
     // 添加自定义文件头信息结束
 
     /* 给wav头增加pcm体 */
-    this.floatTo16BitPCM(view, fileHeaderOfferSet, samples)
+    this.float32To8BitMuLaw(view, fileHeaderOfferSet, samples)
 
     /**
      * （7）rewrite check_sum value
@@ -393,7 +429,6 @@ WaveWorker.prototype.encodeGRPBin = function (samples){
      */
     return view
 }
-
 
 /**
  * 生成导出数据
