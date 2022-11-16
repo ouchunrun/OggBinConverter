@@ -38,6 +38,8 @@ function WaveWorker(){
     this.singleProcessSize = 0
     this.fadeOutTime = false   // true 标识达到渐弱时间
     this.fadeOutRatio = 0.15   // 渐弱比例
+    this.maxBinFileSize = 196608 // 196608 Byte(192KB)
+    this.binHeaderSize = 512  // bin 头文件固定字节
     this.fileSizeLimit = false // 是否限制文件大小
 
     this.alawmulaw = alawmulaw
@@ -286,17 +288,8 @@ WaveWorker.prototype.writeString = function (view, offset, string) {
  */
 WaveWorker.prototype.encodeWAV = function (samples){
     console.warn('encode wave')
-    let fileHeaderOfferSet = 44   // 头文件长度
-    /* 自定义文件头长度 */
-    fileHeaderOfferSet +=8        // ring.bin, Filed size 8
-    fileHeaderOfferSet +=4        // 年, Filed size 4
-    fileHeaderOfferSet +=2        // 月, Filed size 2
-    fileHeaderOfferSet +=2        // 日, Filed size 2
-    fileHeaderOfferSet +=2        // 时, Filed size 2
-    fileHeaderOfferSet +=2        // 分, Filed size 2
-    /* 自定义文件头长度*/
-
-    let buffer = new ArrayBuffer(fileHeaderOfferSet + samples.length * 2)
+    let fileHeaderLength = 44   // 头文件长度
+    let buffer = new ArrayBuffer(fileHeaderLength + samples.length * 2)
     let view = new DataView(buffer)
 
     // WAV音频文件头信息
@@ -317,7 +310,7 @@ WaveWorker.prototype.encodeWAV = function (samples){
      * AudioFormat=6 ITU G.711 a-law
      * AudioFormat=7 ITU G.711 Âµ-law
      */
-    view.setUint16(20, 7, true)
+    view.setUint16(20, 1, true)
     /* channel count */
     view.setUint16(22, this.numberOfChannels, true)
     /* sample rate */
@@ -334,24 +327,8 @@ WaveWorker.prototype.encodeWAV = function (samples){
     view.setUint32(40, samples.length * 2, true)
     /* 到这里文件头信息填写完成，通常情况下共44个字节*/
 
-    // 添加自定义文件头信息
-    let myDate = new Date()
-    let year = myDate.getFullYear();
-    let month = myDate.getMonth();
-    let date = myDate.getDate();
-    let hour = myDate.getHours();
-    let minutes = myDate.getMinutes();
-
-    this.writeString(view, 44, 'ring.bin')     // ring.bin, Filed size: 8
-    view.setUint16(52, year, true)      // 年, Filed size 4
-    view.setUint16(56, month, true)     // 月, Filed size 2
-    view.setUint16(58, date, true)      // 日, Filed size 2
-    view.setUint16(60, hour, true)      // 时, Filed size 2
-    view.setUint16(62, minutes, true)   // 分, Filed size 2
-    // 添加自定义文件头信息结束
-
     /* 给wav头增加pcm体 */
-    this.floatTo16BitPCM(view, fileHeaderOfferSet, samples)
+    this.floatTo16BitPCM(view, fileHeaderLength, samples)
 
     return view
 }
@@ -363,8 +340,7 @@ WaveWorker.prototype.encodeWAV = function (samples){
  */
 WaveWorker.prototype.encodeGRPBin = function (samples){
     console.warn('encode grp bin')
-    let fileHeaderOfferSet = 512   // 1.bin文件整个头是固定 512 字节的
-    let buffer = new ArrayBuffer(fileHeaderOfferSet + samples.length * 2)
+    let buffer = new ArrayBuffer(this.binHeaderSize + samples.length * 2)
     let view = new DataView(buffer)
 
     /**
@@ -408,7 +384,7 @@ WaveWorker.prototype.encodeGRPBin = function (samples){
     // 添加自定义文件头信息结束
 
     /* 给wav头增加pcm体 */
-    this.float32To8BitMuLaw(view, fileHeaderOfferSet, samples)
+    this.float32To8BitMuLaw(view, this.binHeaderSize, samples)
 
     /**
      * （7）rewrite check_sum value
@@ -438,22 +414,16 @@ WaveWorker.prototype.exportWAV = function (){
     let downSampledBuffer = this.getDownSampledBuffer()
 
     // 2.计算文件尺寸是否超出限制
-    let fileLimit = 196608
-    let fileHeaderOfferSetLength = 512  // 整个头是固定 512 字节的
-    let totalFileLength = fileHeaderOfferSetLength + downSampledBuffer.length * 2
-    let maxFileLength = fileLimit - fileHeaderOfferSetLength // 除去头文件长度，文件内容不超过192KB-64
+    let totalFileLength = this.binHeaderSize + downSampledBuffer.length * 2
+    let maxFileLength = this.maxBinFileSize - this.binHeaderSize // 除去头文件长度，文件内容不超过192KB-64
     if(totalFileLength > maxFileLength){
         downSampledBuffer = downSampledBuffer.slice(0, maxFileLength/2)
         console.warn('ring.bin尺寸要求不超过 196608 Byte(192KB)!')
     }
 
     // 3.添加文件头
-    let dataView
-    if(this.encoderType === 'bin'){
-        dataView = this.encodeGRPBin(downSampledBuffer)
-    }else {
-        dataView = this.encodeWAV(downSampledBuffer)
-    }
+    let dataView = this.encodeGRPBin(downSampledBuffer)
+    // let dataView = this.encodeWAV(downSampledBuffer)
 
     self.postMessage({
         message: 'done',
