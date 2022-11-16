@@ -3,7 +3,7 @@ function createRecorder(data){
     let options = {
         workerPath: data.encoderWorkerPath,   // worker 加载路径
         encoderType: data.encoderType,       // 期望转换后的格式
-        desiredSampleRate: data.desiredSampleRate,
+        desiredSampleRate: data.encoderType === 'ogg' ? 16000 : 8000,
         originalSampleRateOverride: data.desiredSampleRate,
     }
     mediaRecorder = new Recorder(options, data)
