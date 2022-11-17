@@ -1,10 +1,10 @@
 function createRecorder(data){
     let mediaRecorder
-    let encoderType = data.encoderType || 'ogg' // GRP260X使用ogg，GRP261P/GXP使用bin。不指定格式时，默认转换为ogg格式
+    data.encoderType = data.encoderType || 'ogg' // GRP260X使用ogg，GRP261P/GXP使用bin。不指定格式时，默认转换为ogg格式
     let options = {
-        encoderType: encoderType,
-        desiredSampleRate: encoderType === 'ogg' ? 16000 : 8000, // 支持ogg和bin格式
-        workerPath: encoderType === 'ogg' ? '/toOgg/oggOpusEncoderWorker.js' : '/toWave/waveEncoderWorker.js',
+        encoderType: data.encoderType,
+        desiredSampleRate: data.encoderType === 'ogg' ? 16000 : 8000, // 支持ogg和bin格式
+        workerPath: data.encoderType === 'ogg' ? '/toOgg/oggOpusEncoderWorker.js' : '/toWave/waveEncoderWorker.js',
         originalSampleRateOverride: data.desiredSampleRate
     }
 
