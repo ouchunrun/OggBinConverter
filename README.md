@@ -17,11 +17,24 @@
 
 ### 转换格式与限制
 
-- 1.音频文件转换为ogg格式文件，采样率 16K， 单声道
-- ~~2.上传文件大小不超过`9M`~~   [暂不限制文件大小]
-- 3.转换后的最好不超过`192KB`。超过的话我们的设备会拒绝下载这个文件，这样的话客户就用不了
-- 4.支持的转换格式随浏览器的能力来，不同浏览器还有些差别
-- 5.支持勾选音频是否淡出
+.ogg 转换要求：
+
+- Format: Opus
+- Channel(s) : 1 channel (单声道)
+- Sampling rate : 16000 Hz (16KHz 采样率)
+- 编码器：OPUS
+- 输出文件后缀为 .ogg
+
+.bin转换要求：(GRP自定义私有音频格式)
+
+- Format : PCM
+- Channel(s) : 1 channel  (单声道)
+- Sampling rate : 8 000 Hz  (8KHz 采样率)
+- Bit depth : 16 bits (位深)
+- 编码器 u-Law (G.711u)
+- 添加特定文件头，包含 file_size、check_sum、version、time、ring.bin 信息
+- 输出文件后缀为 .bin
+- 输出文件尺寸不超过192KB（GRP话机限制）
   
 ### 处理逻辑
 
