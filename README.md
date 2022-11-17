@@ -130,3 +130,7 @@ this.scriptProcessorNode.onaudioprocess = (e) => {
 - [如何实现前端录音功能](https://zhuanlan.zhihu.com/p/43710364)
 - [音乐人必备知识 | 常见的音频格式有哪些？](https://www.bilibili.com/read/cv6126844/)
 - [JS纯前端实现audio音频剪裁剪切复制播放与上传](https://www.zhangxinxu.com/wordpress/2020/07/js-audio-clip-copy-upload/)
+- 采样位深、编码处理：
+  - @see [https://github.com/rochars/wavefile](https://github.com/rochars/wavefile)
+  - @see [https://github.com/rochars/alawmulaw](https://github.com/rochars/alawmulaw)
+  - @see [https://github.com/rochars/bitdepth](https://github.com/rochars/bitdepth)
