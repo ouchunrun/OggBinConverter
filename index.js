@@ -106,10 +106,8 @@ fileWitchButton.onclick = function (){
         encoder({
             file: uploadFile,
             duration: duration,   // 文件录制时长
-            encoderType: outputFormat === 'ogg' ? 'ogg' : 'bin',
+            encoderType: outputFormat,
             audioFadeOut: audioFadeOut.checked,
-            // desiredSampleRate: outputFormat === 'ogg' ? 16000 : 8000,    // Desired encoding sample rate. Audio will be resampled
-            encoderWorkerPath: outputFormat === 'ogg' ? './toOgg/oggOpusEncoderWorker.js' : './toWave/waveEncoderWorker.js',
 
             /**
              * 进度处理

@@ -1,11 +1,13 @@
 function createRecorder(data){
     let mediaRecorder
+    let encoderType = data.encoderType || 'ogg' // GRP260X使用ogg，GRP261P/GXP使用bin。不指定格式时，默认转换为ogg格式
     let options = {
-        workerPath: data.encoderWorkerPath,   // worker 加载路径
-        encoderType: data.encoderType,       // 期望转换后的格式
-        desiredSampleRate: data.encoderType === 'ogg' ? 16000 : 8000,
-        originalSampleRateOverride: data.desiredSampleRate,
+        encoderType: encoderType,
+        desiredSampleRate: encoderType === 'ogg' ? 16000 : 8000, // 支持ogg和bin格式
+        workerPath: encoderType === 'ogg' ? '/toOgg/oggOpusEncoderWorker.js' : '/toWave/waveEncoderWorker.js',
+        originalSampleRateOverride: data.desiredSampleRate
     }
+
     mediaRecorder = new Recorder(options, data)
 
     let defaultRing = ['ring1', 'ring2', 'ring3', 'ring4', 'ring5', 'ring6', 'doorbell', 'silent']
