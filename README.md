@@ -78,7 +78,7 @@ fileReader.onload = function () {
  */
 let fileInput = document.getElementById('fileInput')
 fileInput.onchange = function () {
-    encoder({
+  audioEncoder({
         file: this.files[0],
         duration: 30,
         progressCallback: progressCallback,

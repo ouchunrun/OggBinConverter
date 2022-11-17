@@ -103,7 +103,7 @@ fileWitchButton.onclick = function (){
         let outputFormat = outputFormatSelect.options[outputFormatSelect.selectedIndex].value
         console.log('outputFormat:', outputFormat)
 
-        encoder({
+        audioEncoder({
             file: uploadFile,
             duration: duration,   // 文件录制时长
             encoderType: outputFormat,
