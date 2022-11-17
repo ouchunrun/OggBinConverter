@@ -4,7 +4,7 @@ function createRecorder(data){
     let options = {
         encoderType: data.encoderType,
         desiredSampleRate: data.encoderType === 'ogg' ? 16000 : 8000, // 支持ogg和bin格式
-        workerPath: data.encoderType === 'ogg' ? '/toOgg/oggOpusEncoderWorker.js' : '/toBin/encoderWorker.js',
+        workerPath: data.encoderType === 'ogg' ? './toOgg/oggOpusEncoderWorker.js' : './toBin/encoderWorker.js',
         originalSampleRateOverride: data.desiredSampleRate
     }
 
