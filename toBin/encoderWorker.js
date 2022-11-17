@@ -289,6 +289,7 @@ WaveWorker.prototype.writeString = function (view, offset, string) {
 WaveWorker.prototype.encodeWAV = function (samples){
     console.warn('encode wave')
     let fileHeaderLength = 44   // 头文件长度
+    // body体部分是以Int16写入，所以buffer长度需要*2
     let buffer = new ArrayBuffer(fileHeaderLength + samples.length * 2)
     let view = new DataView(buffer)
 
@@ -340,7 +341,8 @@ WaveWorker.prototype.encodeWAV = function (samples){
  */
 WaveWorker.prototype.encodeGRPBin = function (samples){
     console.warn('encode grp bin')
-    let buffer = new ArrayBuffer(this.binHeaderSize + samples.length * 2)
+    // u-law编码转换时以Uint8写入，buffer不需要扩大
+    let buffer = new ArrayBuffer(this.binHeaderSize + samples.length)
     let view = new DataView(buffer)
 
     /**
