@@ -37,7 +37,7 @@ function WaveWorker(){
     this.bitsPerSample = null
     this.singleProcessSize = 0
     this.fadeOutTime = false   // true 标识达到渐弱时间
-    this.fadeOutRatio = 0.15   // 渐弱比例
+    this.fadeOutRatio = 0.25   // 渐弱比例
     this.maxBinFileSize = 196608 // 196608 Byte(192KB)
     this.binHeaderSize = 512  // bin 头文件固定字节
     this.fileSizeLimit = false // 是否限制文件大小
@@ -111,9 +111,9 @@ WaveWorker.prototype.convertedSizeCalculate = function (){
         self.postMessage({
             message: 'fileExceedsLimit'
         })
-    }else if(remainingSize <= fileLimit * this.fadeOutRatio){  // 文件转换剩余百分之15时，设置音频渐弱
+    }else if(remainingSize <= fileLimit * this.fadeOutRatio){  //设置音频渐弱
         if(!this.fadeOutTime){
-            console.warn('File conversion remaining 15 percent~')
+            console.warn('File conversion remaining 25 percent~')
             this.fadeOutTime = true
             self.postMessage({
                 message: 'fadeOutTime',

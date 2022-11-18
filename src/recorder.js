@@ -44,7 +44,7 @@ function Recorder(config, data) {
   this.recordingDuration = data.recordingDuration || 30   // 指定录制时长，默认最大30秒
   this.fadeOutEnabled = data.audioFadeOut === undefined ? true : data.audioFadeOut
   this.fadeOutBeenSet = false            // 是否设置渐弱 已设置
-  this.gainFadeOutTime = this.recordingDuration * 0.15            // 音频渐弱时间
+  this.gainFadeOutTime = this.recordingDuration * 0.25            // 音频渐弱时间
   this.recorderStopHandler = null     // 停止record的回调处理函数
 }
 
@@ -126,7 +126,7 @@ Recorder.prototype.setRecordingDuration = function (duration){
   }
 
   this.recordingDuration = duration
-  this.gainFadeOutTime = this.recordingDuration * 0.15
+  this.gainFadeOutTime = this.recordingDuration * 0.25
   console.log('set recording duration, ' + duration)
 }
 
