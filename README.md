@@ -1,20 +1,5 @@
 ## 说明
 
-### 浏览器兼容
-
-| 浏览器类型         | 版本  | 浏览器内核  | 是否支持 | 备注         |
-|---------------|-----|--------|------|------------|
-| chrome        | 58+ | chrome | 支持   | 版本为测试的最低版本 |
-| opera         | 45+ | chrome | 支持   | 版本为测试的最低版本 |
-| firefox       | 25+ | chrome | 支持   | 版本为测试的最低版本 |
-| Edge          | 104 | chrome | 支持   | 其他版本未测试    |
-| 360安全浏览器   | 63  | chrome | 支持   | 其他版本未测试    |
-| 搜狗浏览器      | 58  | chrome | 支持   | 其他版本未测试    |
-| QQ浏览器       | 70  | chrome | 支持   | 其他版本未测试    |
-| IE            | -   | -   -  | -    | 不支持        | 
-| Safari        | -   | -   -  | -    | 不支持        | 
-| 老的Edge       | -   | -   -  | -    | 不支持        |
-
 ### 转换格式与限制
 
 .ogg 转换要求：
@@ -78,9 +63,9 @@ fileReader.onload = function () {
 ### bin 文件转换大小限制与音频渐弱处理说明
 
 1.worker 收到buffer数据后保存并立即对数据进行扁平化和下采样处理
-2.当处理后的数据剩余最大尺寸的百分之十五时，通知recorder开始设置音频渐弱
+2.当处理后的数据剩余最大尺寸的25%时，通知recorder开始设置音频渐弱
 3.当处理后的数据大于限制尺寸时，通知recorder停止转换，生成最终文件。超出尺寸限制的文件转换时长小于页面设置时长。
-4.若转换的文件未超出尺寸限制，则根据转换时间设置音频渐弱时间。剩余转换时长小于recordingDuration*0.15时，设置渐弱。
+4.若转换的文件未超出尺寸限制，则根据转换时间设置音频渐弱时间。剩余转换时长小于recordingDuration*0.25时，设置渐弱。
 
 ### 调用示例：
 
@@ -137,12 +122,16 @@ this.scriptProcessorNode.onaudioprocess = (e) => {
 }
 ```  
 
+## LICENSE
+
+- [opus-recorder](https://github.com/chris-rudmin/opus-recorder/blob/master/LICENSE.md)
+- [alawmulaw](https://github.com/rochars/alawmulaw/blob/master/LICENSE)
+
 ### 参考
 
 - [opus-recorder](https://github.com/chris-rudmin/opus-recorder)
+- [RecorderToText](https://github.com/httggdt/RecorderToText)
 - [如何实现前端录音功能](https://zhuanlan.zhihu.com/p/43710364)
-- [音乐人必备知识 | 常见的音频格式有哪些？](https://www.bilibili.com/read/cv6126844/)
-- [JS纯前端实现audio音频剪裁剪切复制播放与上传](https://www.zhangxinxu.com/wordpress/2020/07/js-audio-clip-copy-upload/)
 - 采样位深、编码处理：
   - @see [https://github.com/rochars/wavefile](https://github.com/rochars/wavefile)
   - @see [https://github.com/rochars/alawmulaw](https://github.com/rochars/alawmulaw)
