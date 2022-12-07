@@ -7,11 +7,12 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')  // webpack4之�
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
-const ENV = process.env.NODE_ENV
-console.log('process ENV:', ENV)
-
 let pathsBuild = paths.build
 let staticFilesToDistConfigs = [
+    {
+        from: './README.md',
+        to: paths.build,
+    },
     {
         from: paths.css,
         to: paths.build + '/css/',
@@ -19,6 +20,10 @@ let staticFilesToDistConfigs = [
     {
         from: paths.icons,
         to: paths.build + '/icons/',
+    },
+    {
+        from: paths.src,
+        to:  paths.build + '/src',
     },
     {
         from: paths.toBin +  '/encoderWorker.js',
@@ -34,11 +39,12 @@ let staticFilesToDistConfigs = [
     },
 ]
 let webpackEntry = {
-    convert:[
-        paths.src + "/recorder.js",
-        paths.src + "/encoder.js",
-        "./index.js",
-    ],
+    // convert:[
+    //     paths.src + "/recorder.js",
+    //     paths.src + "/encoder.js",
+    //     "./index.js",
+    // ],
+    index: "./index.js",
 }
 
 /**
@@ -51,7 +57,7 @@ module.exports = {
     devtool: false,  // 控制如何生成map源映射
     target: 'web', // <=== 默认是 'web'，可省略
     mode: 'production',
-    // mode: 'development',  // 打包的模式： production 生产模式（打包后的文件或压缩） development(开发模式，不压缩)
+    // mode: 'development',
     entry: webpackEntry,
     output: {
         path: pathsBuild,
@@ -66,17 +72,23 @@ module.exports = {
             format:'  :msg [:bar] :percent (:elapsed s)'
         }),
         new HtmlWebpackPlugin({
-            template: './index.html',
+            title: 'Ringtone file converter',
+            template: './template_index.ejs',
             filename: 'index.html',
-            hash: true,
-            inject: true,            // 是否将js放在body的末尾
-            // chunks: ['convert'],  // 数组或者'all'，表示要将哪些chunks插入html
+            css: ["css/main.css" ],
+            js: [
+                "toBin/encoderWorker.js",
+                "toOgg/oggOpusEncoderWorker.js",
+                "src/recorder.js",
+                "src/encoder.js",
+            ],
+            inject: 'body',            // 是否将js放在body的末尾
             // minify: false,
-            minify: {
-                collapseWhitespace: true,
-                removeComments: true,
-                removeRedundantAttributes: false,
-                useShortDoctype: false,
+            minify: { // 压缩HTML文件
+                removeAttributeQuotes: true, // 移除属性的引号
+                removeComments: true, // 移除HTML中的注释
+                collapseWhitespace: true, // 删除空白符与换行符
+                minifyCSS: true// 压缩内联css
             },
         }),
         new CleanWebpackPlugin(),  //打包时先清除dist目录

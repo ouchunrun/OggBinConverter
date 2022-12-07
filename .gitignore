@@ -19,4 +19,3 @@ bin-release/
 
 .idea
 node_modules
-dist

@@ -4,6 +4,8 @@
     - 原因：与oggOpusEncoderWorker.js与oggOpusEncoderWorker.wasm 请求时间有关，worker还没ready时，文件已经在处理。建议服务器对请求文件进行gzip压缩，减少流量消耗
     - 处理：添加wasmFetchError失败通知和文件预加载处理
 
+- 添加template_index.ejs默认配置模板
+
 ## 2022-12-1
 
 - 添加 LICENSE
