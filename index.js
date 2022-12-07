@@ -307,6 +307,12 @@ function watermark(watermarkConfig) {
 window.onload = function (){
     // watermark({ watermark_txt: 'Copyright © Grandstream Networks, Inc.' })
     watermark({ watermark_txt: 'Grandstream' })
+
+    fetch('./toOgg/oggOpusEncoderWorker.js').then(response =>
+        console.log('Fetch oggOpusEncoderWorker success, ', response)
+    ).catch(function (error){
+        console.error('Fetch oggOpusEncoderWorker.wasm error, ', error)
+    })
 }
 
 /************************************************日志打印******************************************************/
