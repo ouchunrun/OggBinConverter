@@ -278,7 +278,12 @@ Recorder.prototype.initWorker = function (){
     let callback = (e) => {
       switch (e.data.message){
         case 'ready':
+          console.log('worker ready!')
           resolve()
+          break
+        case 'wasmFetchError':
+          console.error('Wasm file Fetch error, reason: ', e.data.reason)
+          reject(e.data.reason)
           break
         case 'page':
           this.storePage(e['data']['page'])
@@ -297,7 +302,7 @@ Recorder.prototype.initWorker = function (){
           }
           break
         default:
-          console.warn('worker e.data.command:', e.data.command)
+          console.warn('worker e.data.command:', e.data.message)
           break
       }
     }
@@ -313,28 +318,34 @@ Recorder.prototype.initWorker = function (){
 }
 
 Recorder.prototype.start = function (sourceNode, recorderStopHandler){
+  let This = this
   if (this.state === 'inactive') {
     this.recording = true
     this.state = 'recording'
     this.recorderStopHandler = recorderStopHandler
     this.initAudioContext(sourceNode)
-    this.initAudioGraph()
 
     return Promise.all([this.initSourceNode(sourceNode), this.initWorker()]).then((results) => {
       if (!results[0]) {
-        this.recoderOptions && this.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1008)
+        This.recoderOptions && This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1008)
         return
       }
+      this.initAudioGraph()
       this.sourceNode = results[0]
       this.onstart()
       this.worker.postMessage({ command: 'getHeaderPages' })
       this.sourceNode.connect(this.monitorGainNode)
       this.sourceNode.connect(this.recordingGainNode)
+    }).catch(function (error){
+      if (This.recoderOptions && This.recoderOptions.errorCallBack) {
+        This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(error))
+      }
     })
   }
 }
 
 Recorder.prototype.stop = function (){
+  let This = this
   if (this.state !== 'inactive') {
     this.state = 'inactive'
     this.recording = false
@@ -360,8 +371,8 @@ Recorder.prototype.stop = function (){
         }
       })
     } else {
-      if (this.recoderOptions && this.recoderOptions.errorCallback) {
-        this.recoderOptions.errorCallback(Recorder.ERROR_MESSAGE.ERROR_CODE_1009())
+      if (This.recoderOptions && This.recoderOptions.errorCallBack) {
+        This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009())
       }
     }
   }
