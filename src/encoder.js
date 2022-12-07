@@ -43,7 +43,7 @@ function createRecorder(data){
 }
 
 
-window.audioEncoder = function (data){
+function audioEncoder(data){
     let browserDetails = Recorder.getBrowserDetails()
     console.log('browserDetails : ', browserDetails)
     if (browserDetails.browser === 'ie' || browserDetails.browser === 'edge' || browserDetails.browser === 'safari' || (browserDetails.browser === 'chrome' && browserDetails.version < 58) || (browserDetails.browser === 'opera' && browserDetails.chromeVersion < 58) || (browserDetails.browser === 'firefox' && browserDetails.version < 52)) {

@@ -2,7 +2,7 @@
 
 let AudioContext = window.AudioContext || window.webkitAudioContext
 // Constructor
-window.Recorder = function (config, data) {
+function Recorder(config, data) {
   if (!Recorder.isRecordingSupported()) {
     console.error('AudioContext or WebAssembly is not supported')
     return
@@ -264,7 +264,7 @@ Recorder.prototype.initSourceNode = function (sourceNode){
 
 Recorder.prototype.loadWorker = function () {
   if (!this.worker) {
-    this.worker = new Worker(this.config.workerPath)
+    this.worker = new window.Worker(this.config.workerPath)
   }
 }
 
@@ -278,12 +278,7 @@ Recorder.prototype.initWorker = function (){
     let callback = (e) => {
       switch (e.data.message){
         case 'ready':
-          console.log('worker ready!')
           resolve()
-          break
-        case 'wasmFetchError':
-          console.error('Wasm file Fetch error, reason: ', e.data.reason)
-          reject(e.data.reason)
           break
         case 'page':
           this.storePage(e['data']['page'])
@@ -302,7 +297,7 @@ Recorder.prototype.initWorker = function (){
           }
           break
         default:
-          console.warn('worker e.data.command:', e.data.message)
+          console.warn('worker e.data.command:', e.data.command)
           break
       }
     }
@@ -318,34 +313,28 @@ Recorder.prototype.initWorker = function (){
 }
 
 Recorder.prototype.start = function (sourceNode, recorderStopHandler){
-  let This = this
   if (this.state === 'inactive') {
     this.recording = true
     this.state = 'recording'
     this.recorderStopHandler = recorderStopHandler
     this.initAudioContext(sourceNode)
+    this.initAudioGraph()
 
     return Promise.all([this.initSourceNode(sourceNode), this.initWorker()]).then((results) => {
       if (!results[0]) {
-        This.recoderOptions && This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1008)
+        this.recoderOptions && this.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1008)
         return
       }
-      this.initAudioGraph()
       this.sourceNode = results[0]
       this.onstart()
       this.worker.postMessage({ command: 'getHeaderPages' })
       this.sourceNode.connect(this.monitorGainNode)
       this.sourceNode.connect(this.recordingGainNode)
-    }).catch(function (error){
-      if (This.recoderOptions && This.recoderOptions.errorCallBack) {
-        This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(error))
-      }
     })
   }
 }
 
 Recorder.prototype.stop = function (){
-  let This = this
   if (this.state !== 'inactive') {
     this.state = 'inactive'
     this.recording = false
@@ -371,8 +360,8 @@ Recorder.prototype.stop = function (){
         }
       })
     } else {
-      if (This.recoderOptions && This.recoderOptions.errorCallBack) {
-        This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009())
+      if (this.recoderOptions && this.recoderOptions.errorCallback) {
+        this.recoderOptions.errorCallback(Recorder.ERROR_MESSAGE.ERROR_CODE_1009())
       }
     }
   }
