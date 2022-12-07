@@ -169,7 +169,7 @@ fileWitchButton.onclick = function (){
              */
             errorCallBack: function (error){
                 console.error(error.message)
-                consoleLogPrint('【Error】' + error.message)
+                consoleLogPrint('【Error】' + error.message, 'red')
             }
         })
     }
@@ -307,15 +307,25 @@ function watermark(watermarkConfig) {
 window.onload = function (){
     // watermark({ watermark_txt: 'Copyright © Grandstream Networks, Inc.' })
     watermark({ watermark_txt: 'Grandstream' })
+
+    // // 预加载文件，减少网络流量
+    // fetch('./toOgg/oggOpusEncoderWorker.wasm').then(response =>
+    //     console.log('Fetch oggOpusEncoderWorker.wasm success, ', response)
+    // ).catch(function (error){
+    //     console.error('Fetch oggOpusEncoderWorker.wasm error, ', error)
+    // })
 }
 
 /************************************************日志打印******************************************************/
-function consoleLogPrint(text) {
+function consoleLogPrint(text, color) {
     if(!text){
         return
     }
     let p = document.createElement('p')
     p.innerText = text
+    if(color){
+        p.style.color = color
+    }
     consoleLog.appendChild(p)
 }
 

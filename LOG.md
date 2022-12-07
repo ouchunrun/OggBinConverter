@@ -1,3 +1,9 @@
+## 2022-12-7
+
+- .wasm格式问题修正后转换ogg还是失败问题
+    - 原因：与oggOpusEncoderWorker.js与oggOpusEncoderWorker.wasm 请求时间有关，worker还没ready时，文件已经在处理。建议服务器对请求文件进行gzip压缩，减少流量消耗
+    - 处理：添加wasmFetchError失败通知和文件预加载处理
+
 ## 2022-12-1
 
 - 添加 LICENSE
