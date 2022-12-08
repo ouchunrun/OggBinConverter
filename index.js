@@ -11,15 +11,57 @@ let uploadFileInput = document.getElementById('uploadFile')
 let selectButton = document.getElementById('selectButton')
 let fileWitchButton = document.getElementById('fileWitch')
 
+let grpModelSelect = document.getElementById('grpModel')
 let outputFormatSelect = document.getElementById('outputFormat')
 let recordingDurationInput = document.querySelector('div.duration > input[type=range]')
+let durationShow = document.getElementsByClassName('durationShow')[0]
 let switchProcess = document.getElementById('progress')
 let audioFadeOut = document.getElementById('audioFadeOut')
 let durationSelect = document.querySelector('div.duration')
 let recorderPlayer = document.getElementById('player')
 
 outputFormatSelect.onchange = function (){
-    console.log('set output format:', outputFormatSelect.options[outputFormatSelect.selectedIndex].value)
+    let format = outputFormatSelect.options[outputFormatSelect.selectedIndex].value
+    console.log('set output format:', format)
+    switch (format) {
+        case 'ogg':
+            recordingDurationInput.value = 30
+            durationShow.textContent = '30'
+            break
+        case 'bin':
+            recordingDurationInput.value = 12
+            durationShow.textContent = '12'
+            break
+        default:
+            break
+    }
+}
+
+grpModelSelect.onchange = function (){
+    let model = grpModelSelect.options[grpModelSelect.selectedIndex].value
+    switch (model) {
+        case 'ogg':
+            outputFormatSelect.options.selectedIndex = 0
+            outputFormatSelect.disabled = true
+            recordingDurationInput.value = 30
+            durationShow.textContent = '30'
+            break
+        case 'bin':
+            outputFormatSelect.options.selectedIndex = 1
+            outputFormatSelect.disabled = true
+            // GRP对bin格式文件大小存在限制，最大不超过192KB，对应转换后的音频文件最长在12秒左右
+            recordingDurationInput.value = 12
+            durationShow.textContent = '12'
+            break
+        case 'custom':
+            outputFormatSelect.options.selectedIndex = 0
+            outputFormatSelect.disabled = false
+            recordingDurationInput.value = 30
+            durationShow.textContent = '30'
+            break
+        default:
+            break
+    }
 }
 
 selectButton.onclick = function (){
@@ -35,8 +77,7 @@ uploadFileInput.onchange = function (){
  * @param e
  */
 recordingDurationInput.onchange = function (e){
-    let durationShow = document.getElementsByClassName('durationShow')[0]
-    durationShow.textContent = parseInt(e.target.value)
+    durationShow.textContent = e.target.value
 }
 
 /**

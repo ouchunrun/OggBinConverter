@@ -113,22 +113,22 @@ button{
     border-radius: 10px;
 }
 .uploadedFile{
-    height: 90px;
+    /*height: 100px;*/
     border-bottom: 2px solid #f1f1f1;
     line-height: 90px;
     font-size: 14px;
-    padding: 0 20px;
+    padding: 20px;
 }
 .left{
-    width: 30%;
-    float: left;
+    /*float: left;*/
     text-align: left;
-    height: 90px;
-    line-height: 90px;
+    height: 40px;
+    line-height: 40px;
+    width: 100%;
 }
 .audioFileIcon{
     width: 45px;
-    height: 90px;
+    height: 40px;
     float: left;
     display: inline-block;
     margin: 0 auto;
@@ -136,11 +136,11 @@ button{
     background-image: url(../icons/file-audio.svg);
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 45px;
+    background-size: 40px;
     cursor: pointer;
 }
 .fileName{
-    width: 200px;
+    /*width: 200px;*/
     overflow: hidden;
     display: inline-block;
     white-space: nowrap;
@@ -148,13 +148,16 @@ button{
     cursor: pointer;
 }
 .right{
-    width: 70%;
-    float: right;
-    line-height: 90px;
-    text-align: right;
+    width: 100%;
+    line-height: 50px;
+    text-align: left;
+    margin-left: 10px
 }
-#outputFormat{
-    width: 70px;
+#grpModel{
+    min-width: 85px;
+}
+select{
+    min-width: 60px;
     height: 25px;
     background-color: #ffffff;
     border: solid 1px #dcdcdc;
@@ -177,6 +180,9 @@ input:disabled{
     /*color:#ACA899;*/
     opacity: 0.5;
 }
+.duration{
+    clear: both;
+}
 .duration input[type="range"]{
     vertical-align: middle;
     width: 80px;
@@ -195,6 +201,7 @@ input:disabled{
 }
 #player{
     display: none;
+    float: right;
 }
 #player audio{
     vertical-align: middle;

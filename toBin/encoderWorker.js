@@ -589,9 +589,16 @@ WaveWorker.prototype.encodeWAV = function (samples){
  * @returns {DataView}
  */
 WaveWorker.prototype.encodeGRPBin = function (samples){
-    console.warn('encode grp bin')
+    console.warn('encode grp bin, samples length ', samples.length)
     // u-law编码转换时以Uint8写入，buffer不需要扩大
-    let buffer = new ArrayBuffer(this.binHeaderSize + samples.length)
+    let buffer
+    if(samples.length % 2 === 0){
+        buffer = new ArrayBuffer(this.binHeaderSize + samples.length)
+    }else {
+        // TODO: padding 补充: buffer.length 为奇数时，设置check_sum getInt16 时会超出限制, error Offset is outside the bounds of the DataView
+        buffer = new ArrayBuffer(this.binHeaderSize + samples.length + 1)
+        console.log('padding supplement.')
+    }
     let view = new DataView(buffer)
 
     /**
@@ -669,7 +676,7 @@ WaveWorker.prototype.exportWAV = function (){
     let maxFileLength = this.maxBinFileSize - this.binHeaderSize // 除去头文件长度，文件内容不超过192KB-64
     if(totalFileLength > maxFileLength){
         downSampledBuffer = downSampledBuffer.slice(0, maxFileLength/2)
-        console.warn('ring.bin尺寸要求不超过 196608 Byte(192KB)!')
+        console.warn('The size of ring.bin should not exceed 196608 Byte (192KB)')
     }
 
     // 3.添加文件头

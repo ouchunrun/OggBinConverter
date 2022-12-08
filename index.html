@@ -24,13 +24,25 @@
             <div class="uploadedFile">
                 <div class="left">
                     <div class="audioFileIcon"></div>
-                    <span class="fileName">久石譲 - “天空の城ラピュタ”~君をのせて.mp3</span>
+                    <span class="fileName"></span>
+
+                    <div id="player">
+                        <audio controls="" src=""></audio>
+                    </div>
                 </div>
 
                 <div class="right">
                     <div class="duration">
-                        <label>Output format:</label>
-                        <select id="outputFormat">
+                        <label>GRP model:</label>
+                        <select id="grpModel">
+                            <option value="ogg">GRP260X</option>
+                            <option value="bin">GRP261P</option>
+                            <option value="bin">GXP</option>
+                            <option value="custom">Custom</option>
+                        </select>
+
+                        <label>| Output format:</label>
+                        <select id="outputFormat" disabled>
                             <option value="ogg">ogg</option>
                             <option value="bin">gsbin</option>
                         </select>
@@ -41,9 +53,6 @@
 
                         <label>| Audio fade out</label>
                         <input id="audioFadeOut" type="checkbox" value="" checked />
-                    </div>
-                    <div id="player">
-                        <audio controls="" src=""></audio>
                     </div>
                 </div>
             </div>

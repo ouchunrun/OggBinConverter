@@ -1,6 +1,8 @@
 ## 2022-12-8
 
 - 调试转换ogg时页面崩溃问题：chrome降级到101版本后本地测试正常
+- 添加GRP model选择
+- 修复转gsbin格式时 Offset is outside the bounds of the DataView 报错： getInt16 超出buffer范围
 
 ## 2022-12-7
 
