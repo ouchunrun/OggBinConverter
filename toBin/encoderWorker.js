@@ -251,9 +251,9 @@ let alawmulaw = {
             return pcmSamples;
         },
     }
-};
+}
 
-let waveWorker;
+let waveWorker
 self.onmessage = function (e) {
     switch (e.data.command) {
         case 'init':

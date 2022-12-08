@@ -2,7 +2,7 @@
 
 let AudioContext = window.AudioContext || window.webkitAudioContext
 // Constructor
-function Recorder(config, data) {
+window.Recorder = function (config, data) {
   if (!Recorder.isRecordingSupported()) {
     console.error('AudioContext or WebAssembly is not supported')
     return
@@ -264,7 +264,7 @@ Recorder.prototype.initSourceNode = function (sourceNode){
 
 Recorder.prototype.loadWorker = function () {
   if (!this.worker) {
-    this.worker = new window.Worker(this.config.workerPath)
+    this.worker = new Worker(this.config.workerPath)
   }
 }
 
