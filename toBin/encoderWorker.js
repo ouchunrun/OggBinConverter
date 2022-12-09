@@ -290,7 +290,6 @@ function WaveWorker(){
     this.maxBinFileSize = 196608 // 196608 Byte(192KB)
     this.binHeaderSize = 512  // bin 头文件固定字节
     this.fileSizeLimit = false // 是否限制文件大小
-
     this.alawmulaw = alawmulaw
 }
 
@@ -345,22 +344,19 @@ WaveWorker.prototype.record = function (inputBuffer){
 WaveWorker.prototype.convertedSizeCalculate = function (){
     let downSampledBuffer = this.getDownSampledBuffer()
     // 计算转换文件大小
-    let fileLimit = 196608
-    let fileHeaderOfferSetLength = 64
-    let totalFileLength = fileHeaderOfferSetLength + downSampledBuffer.length * 2
-    let maxFileLength = fileLimit - fileHeaderOfferSetLength // 可转换的最大文件尺寸
-    let remainingSize = maxFileLength - totalFileLength  // 剩余转换尺寸
+    let totalFileLength = this.binHeaderSize + downSampledBuffer.length
+    let remainingSize = this.maxBinFileSize - totalFileLength  // 剩余转换尺寸
 
     if(!this.singleProcessSize){  // onaudioprocess每次触发时的buffer大小
-        this.singleProcessSize = downSampledBuffer.length * 2
+        this.singleProcessSize = downSampledBuffer.length
     }
 
-    if(totalFileLength >= maxFileLength){
+    if(totalFileLength >= this.maxBinFileSize){
         console.warn('File exceeds limit, stop converting!')
         self.postMessage({
             message: 'fileExceedsLimit'
         })
-    }else if(remainingSize <= fileLimit * this.fadeOutRatio){  //设置音频渐弱
+    }else if(remainingSize <= this.maxBinFileSize * this.fadeOutRatio){  //设置音频渐弱
         if(!this.fadeOutTime){
             console.warn('File conversion remaining 25 percent~')
             this.fadeOutTime = true
@@ -589,7 +585,7 @@ WaveWorker.prototype.encodeWAV = function (samples){
  * @returns {DataView}
  */
 WaveWorker.prototype.encodeGRPBin = function (samples){
-    console.warn('encode grp bin, samples length ', samples.length)
+    console.warn('encode grp bin, samples length ')
     // u-law编码转换时以Uint8写入，buffer不需要扩大
     let buffer
     if(samples.length % 2 === 0){
@@ -670,12 +666,11 @@ WaveWorker.prototype.encodeGRPBin = function (samples){
 WaveWorker.prototype.exportWAV = function (){
     // 1.获取下采样数据
     let downSampledBuffer = this.getDownSampledBuffer()
-
     // 2.计算文件尺寸是否超出限制
-    let totalFileLength = this.binHeaderSize + downSampledBuffer.length * 2
-    let maxFileLength = this.maxBinFileSize - this.binHeaderSize // 除去头文件长度，文件内容不超过192KB-64
+    let totalFileLength = this.binHeaderSize + downSampledBuffer.length
+    let maxFileLength = this.maxBinFileSize - this.binHeaderSize // 除去头文件长度，文件内容不超过 196096 bytes
     if(totalFileLength > maxFileLength){
-        downSampledBuffer = downSampledBuffer.slice(0, maxFileLength/2)
+        downSampledBuffer = downSampledBuffer.slice(0, maxFileLength)
         console.warn('The size of ring.bin should not exceed 196608 Byte (192KB)')
     }
 

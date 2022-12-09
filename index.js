@@ -26,10 +26,9 @@ outputFormatSelect.onchange = function (){
     switch (format) {
         case 'ogg':
             recordingDurationInput.value = 30
-
             break
         case 'bin':
-            recordingDurationInput.value = 15
+            recordingDurationInput.value = 25
             break
         default:
             break
@@ -50,7 +49,7 @@ grpModelSelect.onchange = function (){
             outputFormatSelect.options.selectedIndex = 1
             outputFormatSelect.disabled = true
             // GRP对bin格式文件大小存在限制，最大不超过192KB，对应转换后的音频文件最长在12秒左右
-            recordingDurationInput.value = 15
+            recordingDurationInput.value = 25
             break
         case 'custom':
             outputFormatSelect.options.selectedIndex = 0
