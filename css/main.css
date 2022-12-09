@@ -153,14 +153,11 @@ button{
     text-align: left;
     margin-left: 10px
 }
-#grpModel{
-    min-width: 85px;
-}
 select{
-    min-width: 60px;
+    min-width: 90px;
     height: 25px;
     background-color: #ffffff;
-    border: solid 1px #dcdcdc;
+    border: solid 1px #cfcfcf;
     font-family: Roboto;
     font-size: 14px;
     font-weight: normal;
@@ -170,9 +167,16 @@ select{
     text-align: left;
     color: #3d3d3d;
     padding-left: 10px;
-    border-color: #cfcfcf;
     -webkit-appearance: none;
     outline: none;
+    border-radius: 3px;
+}
+select:disabled{
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #878787;
+    color: aliceblue;
+    border: solid 2px #000000;
 }
 input:disabled{
     /*border:1px solid #DDD;*/
