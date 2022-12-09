@@ -6,6 +6,7 @@
 - 修复音频前部分存在留白问题：原因是readAsArrayBuffer onload 触发需要一秒多的时间，但是getHeaderPages在readAsArrayBuffer之前已经开始获取了
 - GRANDSTREAM 水印字体同步为公司使用字体
 - 页面添加GRANDSTREAM LOGO
+- 去除页面console显示
 
 ## 2022-12-8
 

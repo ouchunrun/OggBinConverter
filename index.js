@@ -91,7 +91,7 @@ function fileOnChange(file){
         fileUploadContent.style.padding = '0'
         fileConversion.style.display = 'block'
         fileName.innerText = file.name
-        consoleArea.style.display = 'block'
+        // consoleArea.style.display = 'block'
     }else {
         alert('file not found!')
     }
