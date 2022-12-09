@@ -5,6 +5,7 @@
 - 解决转换ogg请求worker、wasm文件时间较长时，前面的数据会丢失一部分问题
 - 修复音频前部分存在留白问题：原因是readAsArrayBuffer onload 触发需要一秒多的时间，但是getHeaderPages在readAsArrayBuffer之前已经开始获取了
 - GRANDSTREAM 水印字体同步为公司使用字体
+- 页面添加GRANDSTREAM LOGO
 
 ## 2022-12-8
 

@@ -18,8 +18,8 @@ let staticFilesToDistConfigs = [
         to: paths.build + '/css/',
     },
     {
-        from: paths.icons,
-        to: paths.build + '/icons/',
+        from: paths.assets,
+        to: paths.build + '/assets/',
     },
     {
         from: paths.src,
@@ -75,7 +75,7 @@ module.exports = {
             title: 'Ringtone file online converter',
             template: './template_index.ejs',
             filename: 'index.html',
-            css: ["css/main.css" ],
+            css: ["assets/css/main.css" ],
             js: [
                 "toBin/encoderWorker.js",
                 "toOgg/oggOpusEncoderWorker.js",

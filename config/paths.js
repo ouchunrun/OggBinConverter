@@ -9,7 +9,7 @@ module.exports = {
     // 静态文件路径
     src: path.resolve(__dirname, '../src'),
     css: path.resolve(__dirname, '../css'),
-    icons: path.resolve(__dirname, '../icons'),
+    assets: path.resolve(__dirname, '../assets'),
     toBin: path.resolve(__dirname, '../toBin'),
     toOgg: path.resolve(__dirname, '../toOgg'),
     // 生产环境输出的文件目录

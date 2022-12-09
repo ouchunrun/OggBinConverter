@@ -35,6 +35,9 @@
     src: url('../BankGothic/BankGothicCMdBT-Medium.otf')
 }
 
+.Maintop{
+    padding: 0 2%;
+}
 html, body{
     margin: 0 auto;
     overflow: hidden;
@@ -66,7 +69,7 @@ button:hover{
     width: 18px;
     height: 18px;
     display: inline-block;
-    background-image: url(../icons/complete.svg);
+    background-image: url(../images/complete.svg);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 18px;
@@ -76,7 +79,7 @@ button:hover{
 }
 .header{
     text-align: center;
-    margin: 50px 0;
+    margin: 0 0 50px 0;
 }
 .header p{
     color: gray;
@@ -99,7 +102,7 @@ button:hover{
     width: 40px;
     height: 40px;
     display: inline-block;
-    background-image: url(../icons/file-open.svg);
+    background-image: url(../images/file-open.svg);
     background-position: center;
     background-repeat: no-repeat;
     vertical-align: middle;
@@ -133,7 +136,7 @@ button{
     width: 22px;
     height: 22px;
     display: inline-block;
-    background-image: url(../icons/file-plus.svg);
+    background-image: url(../images/file-plus.svg);
     background-position: center;
     background-repeat: no-repeat;
     vertical-align: middle;
@@ -171,7 +174,7 @@ button{
     display: inline-block;
     margin: 0 auto;
     text-align: center;
-    background-image: url(../icons/file-audio.svg);
+    background-image: url(../images/file-audio.svg);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 40px;
