@@ -16,7 +16,7 @@
             <span class="completeTip"></span>
             Conversion is successful.
         </div>
-        <h1>Online audio format conversion</h1>
+        <h1>Ringtone file online converter</h1>
         <p>Convert your files to ogg or bin format with this free, fast online converter.</p>
     </div>
 
@@ -27,12 +27,24 @@
                 <div class="left">
                     <div class="audioFileIcon"></div>
                     <span class="fileName"></span>
+
+                    <div id="player">
+                        <audio controls="" src=""></audio>
+                    </div>
                 </div>
 
                 <div class="right">
                     <div class="duration">
-                        <label>Output format:</label>
-                        <select id="outputFormat">
+                        <label>GRP model:</label>
+                        <select id="grpModel">
+                            <option value="ogg">GRP260X</option>
+                            <option value="bin">GRP261P</option>
+                            <option value="bin">GXP</option>
+                            <option value="custom">Customize</option>
+                        </select>
+
+                        <label>| Output format:</label>
+                        <select id="outputFormat" disabled>
                             <option value="ogg">ogg</option>
                             <option value="bin">gsbin</option>
                         </select>
@@ -43,9 +55,6 @@
 
                         <label>| Audio fade out</label>
                         <input id="audioFadeOut" type="checkbox" value="" checked />
-                    </div>
-                    <div id="player">
-                        <audio controls="" src=""></audio>
                     </div>
                 </div>
             </div>
