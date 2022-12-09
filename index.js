@@ -173,7 +173,6 @@ fileWitchButton.onclick = function (){
             doneCallBack:function (file, blob){
                 // 隐藏duration选择，显示audio播放器
                 durationSelect.style.display = 'none'
-                recorderPlayer.style.display = 'block'
 
                 tip.style.opacity = '1'
                 setTimeout(function (){
@@ -183,8 +182,11 @@ fileWitchButton.onclick = function (){
 
                 let dataBlob = new Blob([blob], {type: `audio/${outputFormat}`});
                 let url = URL.createObjectURL(dataBlob)
-                let audioPlayer = document.querySelector("#player > audio")
-                audioPlayer.src = url;
+                if(outputFormat !== 'bin'){  // gsbin 格式无法在线播放
+                    let audioPlayer = document.querySelector("#player > audio")
+                    audioPlayer.src = url;
+                    recorderPlayer.style.display = 'block'
+                }
 
                 // 生成下载链接
                 console.warn('file size:', formatFileSize(file.size))

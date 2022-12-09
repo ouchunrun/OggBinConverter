@@ -82,7 +82,7 @@ window.audioEncoder = function (data){
         return
     }
 
-    let recorder
+    let recorder = createRecorder(data)
     let MIN_LIMIT = 3 // 文件时长不低于3秒
     // let MXA_LIMIT = 9 * 1024 * 1024 // 文件大小要求不超过9M
     // if (file.size > MXA_LIMIT) {
@@ -90,10 +90,13 @@ window.audioEncoder = function (data){
     //     return
     // }
     let bufferSource
-    let mediaStreamSource
     let recordingDuration
     let audioCtx = new AudioContext()
     let fileReader = new FileReader()
+    // 创建一个媒体流的节点
+    let destination = audioCtx.createMediaStreamDestination()
+    // 创建一个新的MediaStreamAudioSourceNode 对象，将声音输入这个对像
+    let mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
 
     /**
      * 监听结束事件:文件时长不足设定时长时
@@ -138,19 +141,11 @@ window.audioEncoder = function (data){
         let bufferSource = audioCtx.createBufferSource()
         bufferSource.buffer = decodedData
         bufferSource.onended = bufferSourceOnEnded
-
-        // 创建一个媒体流的节点
-        let destination = audioCtx.createMediaStreamDestination()
-        recordingDuration = Math.min(data.duration, decodedData.duration) // 文件总时长小于指定的录制时长时，以文件时长为主
-        // 更新录制时长
-        recorder.setRecordingDuration(recordingDuration)
         bufferSource.connect(destination)
         bufferSource.start()
 
-        // 创建一个新的MediaStreamAudioSourceNode 对象，将声音输入这个对像
-        mediaStreamSource = audioCtx.createMediaStreamSource(destination.stream)
-        // 创建audioContext，开始处理声音数据
-        recorder.start(mediaStreamSource, recorderStopHandler)
+        recordingDuration = Math.min(data.duration, decodedData.duration) // 文件总时长小于指定的录制时长时，以文件时长为主
+        recorder.setRecordingDuration(recordingDuration)  // 更新录制时长
     }
 
     try {
@@ -168,8 +163,12 @@ window.audioEncoder = function (data){
                 console.warn('Error catch: ', error)
             })
         }
-        fileReader.readAsArrayBuffer(file)
-        recorder = createRecorder(data)
+
+        // 创建audioContext，开始处理声音数据
+        recorder.start(mediaStreamSource, recorderStopHandler, function (){
+            // TODO: 转换ogg请求worker、wasm文件时间较长时，前面的数据会丢失一部分问题，所以 worker 加载完成后再开始读取文件
+            fileReader.readAsArrayBuffer(file)
+        })
     }catch (e){
         data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(e))
     }

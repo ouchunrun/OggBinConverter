@@ -279,7 +279,7 @@ Recorder.prototype.initWorker = function (){
       switch (e.data.message){
         case 'ready':
           console.log('worker ready!')
-          resolve()
+          resolve({message: e.data.message})
           break
         case 'wasmFetchError':
           console.error('Wasm file Fetch error, reason: ', e.data.reason)
@@ -317,7 +317,7 @@ Recorder.prototype.initWorker = function (){
   })
 }
 
-Recorder.prototype.start = function (sourceNode, recorderStopHandler){
+Recorder.prototype.start = function (sourceNode, recorderStopHandler, callback){
   let This = this
   if (this.state === 'inactive') {
     this.recording = true
@@ -330,6 +330,7 @@ Recorder.prototype.start = function (sourceNode, recorderStopHandler){
         This.recoderOptions && This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1008)
         return
       }
+      callback && callback()
       this.initAudioGraph()
       this.sourceNode = results[0]
       this.onstart()
