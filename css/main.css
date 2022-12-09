@@ -1,3 +1,40 @@
+@font-face {
+    font-family: "BankGothicLightBT"; /* Project id 2604145 */
+    src: url('../BankGothic/Bank Gothic Light BT.ttf')
+}
+@font-face {
+    font-family: "BankGothicMediumBT"; /* Project id 2604145 */
+    src: url('../BankGothic/Bank Gothic Medium BT.ttf')
+}
+@font-face {
+    font-family: "BankGothicLtBTLight"; /* Project id 2604145 */
+    src: url('../BankGothic/BankGothic Lt BT Light.ttf')
+}
+@font-face {
+    font-family: "BankGothicMdBTMedium"; /* Project id 2604145 */
+    src: url('../BankGothic/BankGothic Md BT Medium.ttf')
+}
+@font-face {
+    font-family: "BankGothicRUSSMedium"; /* Project id 2604145 */
+    src: url('../BankGothic/BankGothic RUSS Medium.ttf')
+}
+@font-face {
+    font-family: "BankGothicRegular"; /* Project id 2604145 */
+    src: url('../BankGothic/BankGothic-Regular.ttf')
+}
+@font-face {
+    font-family: "BankGothicRegularDB"; /* Project id 2604145 */
+    src: url('../BankGothic/BankGothic-Regular DB.ttf')
+}
+@font-face {
+    font-family: "BankGothicCLtBTLight"; /* Project id 2604145 */
+    src: url('../BankGothic/BankGothicCLtBT-Light.otf')
+}
+@font-face {
+    font-family: "BankGothicCMdBTMedium"; /* Project id 2604145 */
+    src: url('../BankGothic/BankGothicCMdBT-Medium.otf')
+}
+
 html, body{
     margin: 0 auto;
     overflow: hidden;
@@ -80,6 +117,7 @@ button{
     vertical-align: middle;
     text-align: center;
     line-height: 23px;
+    font-weight: bold;
 }
 .select{
     height: 130px;

@@ -260,7 +260,7 @@ document.addEventListener("dragover",function(e){ // 拖来拖去
 function watermark(watermarkConfig) {
     //默认设置
     let defaultSettings = Object.assign({
-        watermark_txt: "water mark sample text",
+        watermark_txt: "GRANDSTREAM",
         watermark_x: 20, //水印起始位置x轴坐标
         watermark_y: 20, //水印起始位置Y轴坐标
         watermark_rows: 1, //水印行数
@@ -270,7 +270,8 @@ function watermark(watermarkConfig) {
         watermark_color: '#ddd', //水印字体颜色
         watermark_alpha: 0.4, //水印透明度
         watermark_fontsize: '125px', //水印字体大小
-        watermark_font: '微软雅黑', //水印字体
+        watermark_font: 'BankGothicMdBTMedium', //水印字体
+        watermark_letter_spacing: '-17px',   // 间距
         watermark_width: '100%', //水印宽度
         watermark_height: 350, //水印长度
         watermark_angle: 20, //水印倾斜度数
@@ -323,6 +324,7 @@ function watermark(watermarkConfig) {
             mask_div.style.opacity = defaultSettings.watermark_alpha;
             mask_div.style.fontSize = defaultSettings.watermark_fontsize;
             mask_div.style.fontFamily = defaultSettings.watermark_font;
+            mask_div.style.letterSpacing = defaultSettings.watermark_letter_spacing;
             mask_div.style.color = defaultSettings.watermark_color;
             mask_div.style.textAlign = "center";
             mask_div.style.width = defaultSettings.watermark_width + 'px';
@@ -346,8 +348,7 @@ function watermark(watermarkConfig) {
 }
 
 window.onload = function (){
-    // watermark({ watermark_txt: 'Copyright © Grandstream Networks, Inc.' })
-    watermark({ watermark_txt: 'Grandstream' })
+    watermark({})
 }
 
 /************************************************日志打印******************************************************/
