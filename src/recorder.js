@@ -317,7 +317,7 @@ Recorder.prototype.initWorker = function (){
   })
 }
 
-Recorder.prototype.start = function (sourceNode, recorderStopHandler, callback){
+Recorder.prototype.init = function (sourceNode, recorderStopHandler, callback){
   let This = this
   if (this.state === 'inactive') {
     this.recording = true
@@ -331,17 +331,34 @@ Recorder.prototype.start = function (sourceNode, recorderStopHandler, callback){
         return
       }
       callback && callback()
-      this.initAudioGraph()
       this.sourceNode = results[0]
-      this.onstart()
-      this.worker.postMessage({ command: 'getHeaderPages' })
-      this.sourceNode.connect(this.monitorGainNode)
-      this.sourceNode.connect(this.recordingGainNode)
+
+      // TODO: readAsArrayBuffer onload 后再start获取据，否则音频一两秒可能存在空白
+      // this.initAudioGraph()
+      // this.onstart()
+      // this.worker.postMessage({ command: 'getHeaderPages' })
+      // this.sourceNode.connect(this.monitorGainNode)
+      // this.sourceNode.connect(this.recordingGainNode)
     }).catch(function (error){
       if (This.recoderOptions && This.recoderOptions.errorCallBack) {
         This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(error))
       }
     })
+  }
+}
+
+Recorder.prototype.start = function (){
+  let This = this
+  try {
+    this.initAudioGraph()
+    this.onstart()
+    this.worker.postMessage({ command: 'getHeaderPages' })
+    this.sourceNode.connect(this.monitorGainNode)
+    this.sourceNode.connect(this.recordingGainNode)
+  }catch (error){
+    if (This.recoderOptions && This.recoderOptions.errorCallBack) {
+      This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(error))
+    }
   }
 }
 

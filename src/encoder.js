@@ -146,6 +146,7 @@ window.audioEncoder = function (data){
 
         recordingDuration = Math.min(data.duration, decodedData.duration) // 文件总时长小于指定的录制时长时，以文件时长为主
         recorder.setRecordingDuration(recordingDuration)  // 更新录制时长
+        recorder.start()
     }
 
     try {
@@ -165,7 +166,7 @@ window.audioEncoder = function (data){
         }
 
         // 创建audioContext，开始处理声音数据
-        recorder.start(mediaStreamSource, recorderStopHandler, function (){
+        recorder.init(mediaStreamSource, recorderStopHandler, function (){
             // TODO: 转换ogg请求worker、wasm文件时间较长时，前面的数据会丢失一部分问题，所以 worker 加载完成后再开始读取文件
             fileReader.readAsArrayBuffer(file)
         })
