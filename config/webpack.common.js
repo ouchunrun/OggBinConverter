@@ -68,7 +68,7 @@ module.exports = {
             format:'  :msg [:bar] :percent (:elapsed s)'
         }),
         new HtmlWebpackPlugin({
-            title: 'Ringtone file online converter',
+            title: 'Ringtone file converter',
             template: './template_index.ejs',
             filename: 'index.html',
             css: ["assets/css/main.css" ],
