@@ -101,6 +101,7 @@ function fileOnChange(file){
         outputFormatSelect.disabled = grpModelSelect.value !== 'custom';
         recordingDurationInput.disabled = false
         audioFadeOut.disabled = false
+        switchProcess.style.width = '0'
 
         durationSelect.style.display = 'block'
         recorderPlayer.style.display = 'none'
