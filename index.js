@@ -1,4 +1,7 @@
 let tip = document.getElementsByClassName('tip')[0]
+let tipIcon = document.getElementsByClassName('tip-icon')[0]
+let tipText = document.getElementsByClassName('tip-text')[0]
+
 let fileUploadContent = document.getElementById('fileUploadContent')
 let fileConversion = document.getElementById('fileConversion')
 let fileIcon = document.getElementsByClassName('fileIcon')[0]
@@ -92,8 +95,19 @@ function fileOnChange(file){
         fileConversion.style.display = 'block'
         fileName.innerText = file.name
         // consoleArea.style.display = 'block'
+        setTip({showTip: false})
+
+        durationSelect.style.display = 'block'
+        recorderPlayer.style.display = 'none'
+        fileWitchButton.classList.remove('fileDownload')
+        fileWitchButton.innerText = 'Convert'
+        fileWitchButton.style.opacity = '1'
+        fileWitchButton.disabled = false
+        let fileDownloadLink = document.getElementById('fileDownloadLink')
+        fileDownloadLink && fileDownloadLink.remove()
+
     }else {
-        alert('file not found!')
+        setTip({type: 'error', message: 'Please upload the file first!', showTip: true})
     }
 }
 
@@ -124,8 +138,12 @@ fileWitchButton.onclick = function (){
         let fileDownloadLink = document.getElementById('fileDownloadLink')
         fileDownloadLink.click()
     }else {
+        setTip({showTip: false})
         // 隐藏文件上传区域
-        fileUploadContent.style.display = 'none'
+        // fileUploadContent.style.display = 'none'
+        selectButton.disabled = true
+        selectButton.style.opacity = '0.6'
+
         fileWitchButton.style.opacity = '0.6'
         fileWitchButton.disabled = true
         recordingDurationInput.disabled = true
@@ -171,13 +189,15 @@ fileWitchButton.onclick = function (){
              * @param blob
              */
             doneCallBack:function (file, blob){
-                // 隐藏duration选择，显示audio播放器
                 durationSelect.style.display = 'none'
+                fileWitchButton.classList.add('fileDownload')
+                fileWitchButton.innerText = 'Download'
+                fileWitchButton.style.opacity = '1'
+                fileWitchButton.disabled = false
+                selectButton.disabled = false
+                selectButton.style.opacity = '1'
 
-                tip.style.opacity = '1'
-                setTimeout(function (){
-                    tip.style.opacity = '0'
-                }, 5000)
+                setTip({type: 'complete', showTip: true})
                 consoleLogPrint('recorder ondataavailable received!')
 
                 let dataBlob = new Blob([blob], {type: `audio/${outputFormat}`});
@@ -198,11 +218,6 @@ fileWitchButton.onclick = function (){
                 downLoadLink.innerHTML = '<br>' + '[' + new Date().toLocaleString() + '] '+ file.name
                 recorderPlayer.appendChild(downLoadLink)
                 consoleLogPrint('download link generated!')
-
-                fileWitchButton.classList.add('fileDownload')
-                fileWitchButton.innerText = 'Download'
-                fileWitchButton.style.opacity = '1'
-                fileWitchButton.disabled = false
             },
             /**
              * 错误处理
@@ -211,8 +226,34 @@ fileWitchButton.onclick = function (){
             errorCallBack: function (error){
                 console.error(error.message)
                 consoleLogPrint('【Error】' + error.message, 'red')
+
+                selectButton.disabled = false
+                selectButton.style.opacity = '1'
+                setTip({type: 'error', message: error.message, showTip: true})
             }
         })
+    }
+}
+
+function setTip(data){
+    if(data.showTip){
+        if(data.type === 'complete'){
+            tipIcon.classList.remove('tip-icon-close')
+            tipIcon.classList.add('tip-icon-complete')
+            tipText.innerText = 'conversion complete.'  // 转换完成
+        }else {
+            tipIcon.classList.remove('tip-icon-complete')
+            tipIcon.classList.add('tip-icon-close')
+
+            if(data.message){
+                tipText.innerText = data.message
+            }else {
+                tipText.innerText = 'Conversion failed, please try again.'
+            }
+        }
+        tip.style.opacity = '1'
+    }else {
+        tip.style.opacity = '0'
     }
 }
 

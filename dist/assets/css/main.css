@@ -74,28 +74,36 @@ button:hover{
     cursor:pointer;
     opacity: 0.8;
 }
+button:disabled{
+    cursor: not-allowed;
+}
 .tip{
     opacity: 0;
-    min-width: 300px;
-    width: 300px;
+    width: fit-content;
     margin: 0 auto;
     height: 35px;
     line-height: 35px;
     box-shadow: 1px 1px 12px #bdb9b9;
     font-size: 14px;
-    border-radius: 4px
+    border-radius: 4px;
+    padding: 0 50px;
 }
-.completeTip{
+.tip-icon{
     width: 18px;
     height: 18px;
     display: inline-block;
-    background-image: url(../images/complete.svg);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 18px;
     vertical-align: middle;
     margin-top: -4px;
     color: #4caf50;
+}
+.tip-icon-complete{
+    background-image: url(../images/complete.svg);
+}
+.tip-icon-close{
+    background-image: url(../images/close-circle-outline.svg);
 }
 .header{
     text-align: center;
