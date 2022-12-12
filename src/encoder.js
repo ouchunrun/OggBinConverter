@@ -161,7 +161,8 @@ window.audioEncoder = function (data){
                 console.log('upload file duration: ' + decodedData.duration + '(s)')
                 createSourceNode(decodedData)
             }, function (error) {
-                console.warn('Error catch: ', error)
+                console.error('Error catch: ', error)
+                data.errorCallBack && data.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(error))
             })
         }
 

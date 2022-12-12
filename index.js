@@ -97,6 +97,11 @@ function fileOnChange(file){
         // consoleArea.style.display = 'block'
         setTip({showTip: false})
 
+        grpModelSelect.disabled = false
+        outputFormatSelect.disabled = grpModelSelect.value !== 'custom';
+        recordingDurationInput.disabled = false
+        audioFadeOut.disabled = false
+
         durationSelect.style.display = 'block'
         recorderPlayer.style.display = 'none'
         fileWitchButton.classList.remove('fileDownload')
@@ -105,7 +110,6 @@ function fileOnChange(file){
         fileWitchButton.disabled = false
         let fileDownloadLink = document.getElementById('fileDownloadLink')
         fileDownloadLink && fileDownloadLink.remove()
-
     }else {
         setTip({type: 'error', message: 'Please upload the file first!', showTip: true})
     }
@@ -146,6 +150,7 @@ fileWitchButton.onclick = function (){
 
         fileWitchButton.style.opacity = '0.6'
         fileWitchButton.disabled = true
+        grpModelSelect.disabled = true
         recordingDurationInput.disabled = true
         audioFadeOut.disabled = true
         outputFormatSelect.disabled = true
@@ -240,7 +245,7 @@ function setTip(data){
         if(data.type === 'complete'){
             tipIcon.classList.remove('tip-icon-close')
             tipIcon.classList.add('tip-icon-complete')
-            tipText.innerText = 'conversion complete.'  // 转换完成
+            tipText.innerText = 'Conversion complete.'  // 转换完成
         }else {
             tipIcon.classList.remove('tip-icon-complete')
             tipIcon.classList.add('tip-icon-close')

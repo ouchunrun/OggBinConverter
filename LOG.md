@@ -1,9 +1,8 @@
 ## 2022-12-12
 
-- 调整LOGO样式，添加Copyright
-- 反馈问题优化：
-  - After you convert a file, there should be another button to go back to the start. For now, the only option is to download, if you want to go back to the start, you’ll have to refresh the page.
-  - I don’t think users need to see the console output.   修改为error tip提示
+- 调整LOGO样式，添加底部Copyright 
+- 转换完成后显示上传文件按钮，避免转换完成后需刷新页面才能重新转换问题 
+- 添加Recording duration设置项描述
 
 ## 2022-12-9
 
