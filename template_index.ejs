@@ -9,6 +9,9 @@
     <% } %>
 </head>
 <body>
+<div class="maintop">
+    <img src="assets/images/560X120.png">
+</div>
 
 <div class="content">
     <div class="header">
@@ -89,6 +92,13 @@
         <div id="consoleLog"></div>
     </div>
 </div>
+
+<footer class="app-footer">
+    <section class="foot">
+        <h3>Copyright © Grandstream Networks, Inc. 2022. All Rights Reserved.</h3>
+    </section>
+</footer>
+
 <% for (let chunk in htmlWebpackPlugin.options.js) { %>
 <script type="text/javascript" src="<%=htmlWebpackPlugin.options.js[chunk] %>"></script>
 <% } %>

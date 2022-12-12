@@ -14,10 +14,6 @@ let staticFilesToDistConfigs = [
         to: paths.build,
     },
     {
-        from: paths.css,
-        to: paths.build + '/css/',
-    },
-    {
         from: paths.assets,
         to: paths.build + '/assets/',
     },

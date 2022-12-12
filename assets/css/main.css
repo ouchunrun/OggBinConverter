@@ -35,9 +35,29 @@
     src: url('../BankGothic/BankGothicCMdBT-Medium.otf')
 }
 
-.Maintop{
+.maintop{
     padding: 0 2%;
 }
+.maintop img{
+    max-width: 280px;
+}
+.app-footer{
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    color: #bcbcbd;
+    width: 100%;
+    font-size: 10px;
+    text-align: center;
+    background: #1f4574;
+}
+.foot h3{
+    font-weight: 400;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 html, body{
     margin: 0 auto;
     overflow: hidden;
