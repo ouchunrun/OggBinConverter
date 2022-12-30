@@ -12,7 +12,8 @@ let consoleLog = document.getElementById('consoleLog')
 let uploadFile
 let uploadFileInput = document.getElementById('uploadFile')
 let selectButton = document.getElementById('selectButton')
-let fileWitchButton = document.getElementById('fileWitch')
+let fileSwitchButton = document.getElementById('fileSwitch')
+let startOverButton = document.getElementById('startOver')
 
 let grpModelSelect = document.getElementById('grpModel')
 let outputFormatSelect = document.getElementById('outputFormat')
@@ -72,6 +73,9 @@ selectButton.onclick = function (){
 uploadFileInput.onchange = function (){
     fileOnChange(this.files[0])
 }
+startOverButton.onclick = function (){
+     uploadFileInput.click()
+}
 
 /**
  * duration
@@ -87,10 +91,19 @@ recordingDurationInput.onchange = function (e){
 function fileOnChange(file){
     if(file){
         console.log('upload file: ', file.name)
-        uploadFile = file
+        if (!/audio\/\w+/.test(file.type)) {
+            // selectButton.disabled = false
+            // selectButton.style.opacity = '1'
+            startOverButton.disabled = false
+            setTip({type: 'error', message: Recorder.ERROR_MESSAGE.ERROR_CODE_1006.message, showTip: true})
+            return
+        }
+        fileSwitchButton.disabled = true
 
+        uploadFile = file
         // 显示上传的文件名和文件duration设置
         fileIcon.style.display = 'none'
+        fileUploadContent.style.display = 'none'
         fileUploadContent.style.padding = '0'
         fileConversion.style.display = 'block'
         fileName.innerText = file.name
@@ -105,10 +118,10 @@ function fileOnChange(file){
 
         durationSelect.style.display = 'block'
         recorderPlayer.style.display = 'none'
-        fileWitchButton.classList.remove('fileDownload')
-        fileWitchButton.innerText = 'Convert'
-        fileWitchButton.style.opacity = '1'
-        fileWitchButton.disabled = false
+        fileSwitchButton.classList.remove('fileDownload')
+        fileSwitchButton.innerText = 'Convert'
+        fileSwitchButton.style.display = 'inline-block'
+        fileSwitchButton.disabled = false
         let fileDownloadLink = document.getElementById('fileDownloadLink')
         fileDownloadLink && fileDownloadLink.remove()
     }else {
@@ -137,20 +150,21 @@ function formatFileSize(fileSize){
 /**
  * 文件转换
  */
-fileWitchButton.onclick = function (){
-    if(fileWitchButton.classList.contains('fileDownload')){
+fileSwitchButton.onclick = function (){
+    if(fileSwitchButton.classList.contains('fileDownload')){
         // 下载
         let fileDownloadLink = document.getElementById('fileDownloadLink')
         fileDownloadLink.click()
     }else {
         setTip({showTip: false})
         // 隐藏文件上传区域
-        // fileUploadContent.style.display = 'none'
+        fileUploadContent.style.display = 'none'
+        startOverButton.style.display = 'none'
         selectButton.disabled = true
         selectButton.style.opacity = '0.6'
 
-        fileWitchButton.style.opacity = '0.6'
-        fileWitchButton.disabled = true
+        // fileSwitchButton.style.opacity = '0.6'
+        fileSwitchButton.disabled = true
         grpModelSelect.disabled = true
         recordingDurationInput.disabled = true
         audioFadeOut.disabled = true
@@ -196,12 +210,13 @@ fileWitchButton.onclick = function (){
              */
             doneCallBack:function (file, blob){
                 durationSelect.style.display = 'none'
-                fileWitchButton.classList.add('fileDownload')
-                fileWitchButton.innerText = 'Download'
-                fileWitchButton.style.opacity = '1'
-                fileWitchButton.disabled = false
+                fileSwitchButton.classList.add('fileDownload')
+                fileSwitchButton.innerText = 'Download'
+                fileSwitchButton.style.opacity = 'inline-block'
+                fileSwitchButton.disabled = false
                 selectButton.disabled = false
                 selectButton.style.opacity = '1'
+                startOverButton.style.display = 'inline-block'
 
                 setTip({type: 'complete', showTip: true})
                 consoleLogPrint('recorder ondataavailable received!')
@@ -235,6 +250,8 @@ fileWitchButton.onclick = function (){
 
                 selectButton.disabled = false
                 selectButton.style.opacity = '1'
+                fileSwitchButton.disabled = true
+                startOverButton.style.display = 'inline-block'
                 setTip({type: 'error', message: error.message, showTip: true})
             }
         })

@@ -1,3 +1,10 @@
+## 2022-12-30
+
+- 反馈问题处理
+  - 1.Convert your files to ogg or bin format with this free, fast online converter. May be change it to “Convert audio files to ogg or bin format with this free and fast online converter”.
+  - 2.Instead of another drag and drop section, maybe add a “Start over” button. (or Restart) This way users will not think that we can convert multiple files at the same time.
+  - 3.File does not get restriction until you actually trying to convert it. I think it might be better if we do restriction first. For example, when I upload a picture, it will still upload but prompt “Only audio is supported!” when hit convert. 
+
 ## 2022-12-12
 
 - 调整LOGO样式，添加底部Copyright 
