@@ -318,3 +318,39 @@ input:disabled{
     margin: 5px;
     font-size: 14px;
 }
+/*音频可视化*/
+#vibrationElement {
+    background-color: #00ff77;
+    opacity: 0.5;
+    width: 800px;
+    /*height: 50px;*/
+    /*bottom: 40px;*/
+    left: 50%;
+    transform: translateX(-50%);
+    animation: vibrationAnimation linear infinite alternate;
+    position: absolute;
+    top: 587px;
+    z-index: 99;
+}
+
+#vibrationElement div{
+    width: 2.3px;
+    background: black;
+    display: inline-block;
+    /*margin-right: 1px;*/
+    float: left;
+}
+
+@keyframes vibrationAnimation {
+    0% {
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        transform: translateX(-50%) translateY(20px);
+    }
+}
+.waveform {
+    max-width: 800px;
+    height: 150px;
+    margin: auto;
+}

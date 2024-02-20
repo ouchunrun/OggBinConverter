@@ -67,6 +67,11 @@
                 <button id="fileSwitch">Convert</button>
                 <button id="startOver">Start over</button>
             </div>
+
+            <div style="text-align: right;">
+                <a href="javascript:" id="btnPlay" role="button">播放</a>
+                <a href="javascript:" id="btnPause" role="button">暂停</a>
+            </div>
         </div>
     </div>
 
@@ -92,6 +97,12 @@
     </div>
 </div>
 
+<!--  音频可视化处理 -->
+<div>
+    <div id="waveform" class="waveform"></div>
+    <div id="vibrationElement"></div>
+</div>
+
 <footer class="app-footer">
     <section class="foot">
         <h3>Copyright © Grandstream Networks, Inc. 2023. All Rights Reserved.</h3>
@@ -99,6 +110,9 @@
 </footer>
 
 <!--预加载-->
+<!--wavesurfer.js比较耗时-->
+<!--<script type="text/javascript" src="https://unpkg.com/wavesurfer.js"></script>-->
+<script type="text/javascript" src="src/wavesurfer.js"></script>
 <script type="application/javascript" src="toBin/encoderWorker.js"></script>
 <script type="application/javascript" src="toOgg/oggOpusEncoderWorker.js"></script>
 <!--预加载结束-->

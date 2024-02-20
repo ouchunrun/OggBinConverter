@@ -180,6 +180,18 @@ fileSwitchButton.onclick = function (){
         let outputFormat = outputFormatSelect.options[outputFormatSelect.selectedIndex].value
         console.log('outputFormat:', outputFormat)
 
+        var wavesurfer = WaveSurfer.create({
+            container: '#waveform',
+        });
+        wavesurfer.load(`./audio/${uploadFile.name}`);
+        document.getElementById('btnPlay').addEventListener('click', function () {
+            wavesurfer.play();
+        });
+        document.getElementById('btnPause').addEventListener('click', function () {
+            wavesurfer.pause();
+        });
+
+        // console.warn('上传的文件:', uploadFile)
         audioEncoder({
             file: uploadFile,
             duration: duration,   // 文件录制时长
@@ -206,9 +218,11 @@ fileSwitchButton.onclick = function (){
             /**
              * 转换完成后的处理，mediaRecorder.ondataavailable 返回
              * @param file
+             * @param tagsInfo 振动时间段：铃声文件上传接口（POST /cgi-bin/ringtone）会增加一个查询参数 tags，值为JSON数组 （["VIBRATION=0.0-1.1;"]，需要用 encodeURIComponent 编码。以秒为单位，保留两位小数
              * @param blob
              */
-            doneCallBack:function (file, blob){
+            doneCallBack:function (file, tagsInfo, blob){
+                console.log('tagsInfo:', tagsInfo)
                 durationSelect.style.display = 'none'
                 fileSwitchButton.classList.add('fileDownload')
                 fileSwitchButton.innerText = 'Download'
@@ -227,6 +241,25 @@ fileSwitchButton.onclick = function (){
                     let audioPlayer = document.querySelector("#player > audio")
                     audioPlayer.src = url;
                     recorderPlayer.style.display = 'block'
+
+
+                    /*******************************************音频可视化处理******************************************/
+                    let parentEle = document.getElementById('vibrationElement')
+                    let averageScore = window.averageVolume * 50
+                    parentEle.style.height = averageScore + 'px'
+                    for(let i = 0; i<maxVolumeBuffer.length; i++){
+                        let buffer = maxVolumeBuffer[i] * 50   // 放大，否则高度太小，不利于观察
+                        let newEle = document.createElement('div')
+                        newEle.style.height = (buffer) + 'px'
+                        newEle.className = 'line'
+
+                        if(buffer>=averageScore){
+                            console.log('振动...')
+                            newEle.style.backgroundColor = 'red'
+                        }
+                        parentEle.appendChild(newEle)
+                    }
+
                 }
 
                 // 生成下载链接

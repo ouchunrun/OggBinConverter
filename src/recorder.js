@@ -46,6 +46,15 @@ window.Recorder = function (config, data) {
   this.fadeOutBeenSet = false            // 是否设置渐弱 已设置
   this.gainFadeOutTime = this.recordingDuration * 0.25            // 音频渐弱时间
   this.recorderStopHandler = null     // 停止record的回调处理函数
+
+  // 随音乐变化振动效果的实现
+  this.maxVolume = 0 // 采样点幅度最大值
+  this.totalVolume = 0 // 累加音量值
+  this.volumeCount = 0 // 有效采样周期个数
+  this.averageVolume = 0 // 平均音量
+  this.maxVolumeBuffer = [] //
+  this.vibrationTag = '' // 振动标记
+  this.audioprocessDuration = 0 // onaudioprocess事件触发的时间间隔
 }
 
 
@@ -190,6 +199,85 @@ Recorder.prototype.initAudioContext = function (sourceNode){
   }
   return this.audioContext
 }
+/************************************************随音乐变化振动效果的实现*************************************************/
+/**
+ * 实现说明：
+ *  1.处理onaudioprocess方法返回的pcm音频数据，采样点幅度最大值为maxVolume，采样点幅度最大值累加为totalVolume，有效采样周期为volumeCount，采样点幅度最大值的平均值为averageVolume
+ *    所以采样点幅度最大值为maxVolumeBuffer，振动标记为vibrationTag， onaudioprocess事件触发的时间间隔为audioprocessDuration
+ *  2.采样数据大于0时，计数，得到volumeCount，并计数totalVolume，同时保存maxVolumeBuffer；采样数据为0时，视为无效，不进行统计。
+ *  3.onaudioprocess处理结束后，计算音量平均值 averageVolume = (totalVolume/volumeCount).toFixed(2)
+ *  4.处理volumeBuffer数据，volumeBuffer大于等于averageVolumeScore时计算开始振动时间t1，小于averageVolumeScore中断后得到结束振动时间t2；t1~t2即为一个振动时间段
+ *    t1 = this.audioprocessDuration * (i+1)
+ *    t2 = this.audioprocessDuration * i  // 结束时间为上次非0的时间点
+ *  6.最后返回格式为值为JSON数组 （["VIBRATION=0.0-1.1;"] 的数据，作为URL参数发送给服务器进行振动处理，振动数据需要用 encodeURIComponent 编码处理
+ */
+
+/**
+ * 获取高于平均值的振动时间段
+ */
+Recorder.prototype.setVibrationTags = function (){
+  let cache = {}
+  let tags = ''
+  for(let i = 0; i<this.maxVolumeBuffer.length; i++){
+    let buffer = this.maxVolumeBuffer[i].toFixed(2) // 保留两位数
+    if(buffer >= this.averageVolume){
+      if(!cache.t1){
+        cache.t1 = this.audioprocessDuration * (i+1)  // 每次触发的间隔时间为audioprocessDuration，所以处理索引即可
+      }
+    }else {
+      if(cache.t1){
+        cache.t2 = this.audioprocessDuration * i  // 结束时间为上次非0的时间点
+        if(cache.t2 !== cache.t1){
+          if(!tags){
+            tags = tags + "VIBRATION="
+          }
+          tags = tags + cache.t1.toFixed(2) + '-' + cache.t2.toFixed(2) + ';' // 时间以秒为单位，保留两位小数
+        }else {
+          // 只有开始时间时，不添加
+        }
+        cache = {}
+      }
+    }
+  }
+
+  if(tags){
+    let tagsInfo = '["' + tags + '"]'
+    console.log('get tags info as:', tagsInfo)
+    this.vibrationTag = encodeURIComponent(tagsInfo)
+  }else {
+    console.warn('No vibration data obtained!!')
+  }
+}
+
+/**
+ * 获取音量
+ * 计算方法：获取每次缓冲区中最大的音量值
+ * @param data
+ */
+Recorder.prototype.volumeCalculate = function (data = {}){
+  if(!data.end){
+    // 获得缓冲区的输入音频，转换为包含了PCM通道数据的32位浮点数组
+    const inputData = data.event.inputBuffer.getChannelData(0)  // 可以获取单个声道的PCM数据
+    // 获取缓冲区中最大的音量值
+    this.maxVolume = Math.max(...inputData)
+    if(this.maxVolume){
+      this.maxVolumeBuffer.push(this.maxVolume)
+      this.totalVolume += this.maxVolume
+      this.volumeCount++
+    }else {
+      // console.log('a volume of 0 does not count towards processing')
+    }
+  }else {
+    this.averageVolume = (this.totalVolume / this.volumeCount).toFixed(2)
+    console.log('Average volume: ', this.averageVolume)
+    this.setVibrationTags()
+
+    // for test
+    window.averageVolume = this.averageVolume
+    window.maxVolumeBuffer = this.maxVolumeBuffer
+  }
+}
+/**********************************************************************************************************************/
 
 Recorder.prototype.initAudioGraph = function (){
   let This = this
@@ -197,12 +285,9 @@ Recorder.prototype.initAudioGraph = function (){
   this.encodeBuffers = function () {
     delete this.encodeBuffers
   }
-  <!--创建声音的缓存节点，createScriptProcessor方法的第二个和第三个参数指的是输入和输出都是声道数，第一个参数缓存大小，一般数值为1024,2048,4096，这里选用4096-->
   this.scriptProcessorNode = this.audioContext.createScriptProcessor(this.config.bufferLength, this.config.numberOfChannels, this.config.numberOfChannels)
   this.scriptProcessorNode.connect(this.audioContext.destination)
-  // 此方法音频缓存，这里通过encodeBuffers方法进行缓存
   let audioprocessCount = 0
-  let audioprocessDuration = 0
   let audioprocessTotalDuration = 0
 
   this.scriptProcessorNode.onaudioprocess = function (e) {
@@ -210,14 +295,14 @@ Recorder.prototype.initAudioGraph = function (){
       console.warn('onaudioprocess recording false!!')
       return
     }
-    if(!audioprocessDuration){
-      audioprocessDuration = e.inputBuffer.duration
-      console.log('get onaudioprocess trigger duration: ' + audioprocessDuration)
+    if(!This.audioprocessDuration){
+      This.audioprocessDuration = e.inputBuffer.duration
+      console.log('get onaudioprocess trigger duration: ' + This.audioprocessDuration)
     }
     audioprocessCount++
     This.encodeBuffers(e.inputBuffer)
 
-    audioprocessTotalDuration = audioprocessCount * audioprocessDuration
+    audioprocessTotalDuration = audioprocessCount * This.audioprocessDuration
     let timeLeft = This.recordingDuration - audioprocessTotalDuration
     if (timeLeft > 0) {
       if(This.recorderStopHandler){
@@ -228,7 +313,7 @@ Recorder.prototype.initAudioGraph = function (){
         console.warn('set audio fade out')
         if(This.fadeOutTime){
           // onaudioprocess 每次触发时的时长间隔 * 剩余触发时间
-          timeLeft = audioprocessDuration * This.remainingTimes
+          timeLeft = This.audioprocessDuration * This.remainingTimes
           console.log('audioprocessTotalDuration:', audioprocessTotalDuration)
           console.log('This.remainingTimes:', This.remainingTimes)
           console.log('timeLeft:', timeLeft)
@@ -237,12 +322,17 @@ Recorder.prototype.initAudioGraph = function (){
         This.setRecordingGainFadeOut(timeLeft)
         This.fadeOutBeenSet = true
       }
+
+      // 计算音量
+      This.volumeCalculate({event: e, end: false})
     } else {
       console.log('process count: ', audioprocessCount)
       console.log('audio process total duration: ', audioprocessTotalDuration)
       if(This.recorderStopHandler){
         This.recorderStopHandler({ state: 'stop' })
       }
+
+      This.volumeCalculate({event: null, end: true})
     }
   }
 
@@ -351,10 +441,10 @@ Recorder.prototype.start = function (){
   let This = this
   try {
     this.initAudioGraph()
-    this.onstart()
-    this.worker.postMessage({ command: 'getHeaderPages' })
-    this.sourceNode.connect(this.monitorGainNode)
-    this.sourceNode.connect(this.recordingGainNode)
+      this.onstart()
+      this.worker.postMessage({ command: 'getHeaderPages' })
+      this.sourceNode.connect(this.monitorGainNode)
+      this.sourceNode.connect(this.recordingGainNode)
   }catch (error){
     if (This.recoderOptions && This.recoderOptions.errorCallBack) {
       This.recoderOptions.errorCallBack(Recorder.ERROR_MESSAGE.ERROR_CODE_1009(error))
@@ -412,7 +502,7 @@ Recorder.prototype.finish = function (outputData) {
     }, 0)
   }
 
-  this.ondataavailable(outputData)
+  this.ondataavailable(outputData, this.vibrationTag)
 
   this.onstop()
   if (!this.config.reuseWorker) {

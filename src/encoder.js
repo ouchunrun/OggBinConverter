@@ -33,10 +33,10 @@ function createRecorder(data){
         console.log('mediaRecorder is resuming')
     }
 
-    mediaRecorder.ondataavailable = function (blob) {
+    mediaRecorder.ondataavailable = function (blob, vibrationTag) {
         console.log('Data ondataavailable received')
         let file =   new File([blob], `${mediaRecorder.fileName}.${data.encoderType}`)
-        mediaRecorder.recoderOptions.doneCallBack(file , blob)
+        mediaRecorder.recoderOptions.doneCallBack(file , vibrationTag, blob)
     }
 
     return mediaRecorder
