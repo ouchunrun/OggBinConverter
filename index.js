@@ -180,8 +180,23 @@ fileSwitchButton.onclick = function (){
         let outputFormat = outputFormatSelect.options[outputFormatSelect.selectedIndex].value
         console.log('outputFormat:', outputFormat)
 
-        var wavesurfer = WaveSurfer.create({
-            container: '#waveform',
+        // var wavesurfer = WaveSurfer.create({
+        //     container: '#waveform',
+        // });
+        let wavesurfer = WaveSurfer.create({
+            container: document.querySelector('#waveform'),
+            plugins: [
+                WaveSurfer.cursor.create({
+                    showTime: true,
+                    opacity: 1,
+                    customShowTimeStyle: {
+                        'background-color': '#000',
+                        color: '#fff',
+                        padding: '2px',
+                        'font-size': '10px'
+                    }
+                })
+            ]
         });
         wavesurfer.load(`./audio/${uploadFile.name}`);
         document.getElementById('btnPlay').addEventListener('click', function () {
