@@ -55,6 +55,7 @@ window.Recorder = function (config, data) {
   this.maxVolumeBuffer = [] //
   this.vibrationTag = '' // 振动标记
   this.audioprocessDuration = 0 // onaudioprocess事件触发的时间间隔
+  this.vibrationTagHasBeenSet = false
 }
 
 
@@ -244,6 +245,7 @@ Recorder.prototype.setVibrationTags = function (){
     let tagsInfo = '["' + tags + '"]'
     console.log('get tags info as:', tagsInfo)
     this.vibrationTag = encodeURIComponent(tagsInfo)
+    console.log('encodeURIComponent tags info: ', this.vibrationTag)
   }else {
     console.warn('No vibration data obtained!!')
   }
@@ -268,6 +270,7 @@ Recorder.prototype.volumeCalculate = function (data = {}){
       // console.log('a volume of 0 does not count towards processing')
     }
   }else {
+    this.vibrationTagHasBeenSet = true
     this.averageVolume = (this.totalVolume / this.volumeCount).toFixed(2)
     console.log('Average volume: ', this.averageVolume)
     this.setVibrationTags()
@@ -289,6 +292,7 @@ Recorder.prototype.initAudioGraph = function (){
   this.scriptProcessorNode.connect(this.audioContext.destination)
   let audioprocessCount = 0
   let audioprocessTotalDuration = 0
+  this.vibrationTagHasBeenSet = false
 
   this.scriptProcessorNode.onaudioprocess = function (e) {
     if (!This.recording){
@@ -328,11 +332,11 @@ Recorder.prototype.initAudioGraph = function (){
     } else {
       console.log('process count: ', audioprocessCount)
       console.log('audio process total duration: ', audioprocessTotalDuration)
+      This.volumeCalculate({event: null, end: true})
+
       if(This.recorderStopHandler){
         This.recorderStopHandler({ state: 'stop' })
       }
-
-      This.volumeCalculate({event: null, end: true})
     }
   }
 
@@ -454,6 +458,11 @@ Recorder.prototype.start = function (){
 
 Recorder.prototype.stop = function (){
   let This = this
+  if(!this.vibrationTagHasBeenSet){
+    console.log('Vibration tags is not obtained')
+    This.volumeCalculate({event: null, end: true})
+  }
+
   if (this.state !== 'inactive') {
     this.state = 'inactive'
     this.recording = false

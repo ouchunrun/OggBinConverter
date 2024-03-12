@@ -254,7 +254,7 @@ fileSwitchButton.onclick = function (){
                         newEle.className = 'line'
 
                         if(buffer>=averageScore){
-                            console.log('振动...')
+                            // console.log('振动...')
                             newEle.style.backgroundColor = 'red'
                         }
                         parentEle.appendChild(newEle)
