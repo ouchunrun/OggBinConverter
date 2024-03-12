@@ -91,6 +91,7 @@ recordingDurationInput.onchange = function (e){
 function fileOnChange(file){
     if(file){
         console.log('upload file: ', file.name)
+        setWavesurfer(file)
         if (!/audio\/\w+/.test(file.type)) {
             // selectButton.disabled = false
             // selectButton.style.opacity = '1'
@@ -148,6 +149,37 @@ function formatFileSize(fileSize){
 }
 
 /**
+ * 加载并显示音频波形可视化组件
+ * @param file
+ */
+function setWavesurfer(file){
+    let wavesurfer = WaveSurfer.create({
+        normalize: true,
+        container: document.querySelector('#waveform'),
+        plugins: [
+            WaveSurfer.cursor.create({
+                showTime: true,
+                opacity: 1,
+                customShowTimeStyle: {
+                    'background-color': '#000',
+                    color: '#fff',
+                    padding: '2px',
+                    'font-size': '10px'
+                }
+            })
+        ]
+    });
+    wavesurfer.load(`./audio/30_second/${file.name}`);
+
+    document.getElementById('btnPlay').addEventListener('click', function () {
+        wavesurfer.play(); // 播放的开始时间和结束时间
+    });
+    document.getElementById('btnPause').addEventListener('click', function () {
+        wavesurfer.pause();
+    });
+}
+
+/**
  * 文件转换
  */
 fileSwitchButton.onclick = function (){
@@ -179,32 +211,6 @@ fileSwitchButton.onclick = function (){
         consoleLogPrint('audio fade out enabled ' + audioFadeOut.checked)
         let outputFormat = outputFormatSelect.options[outputFormatSelect.selectedIndex].value
         console.log('outputFormat:', outputFormat)
-
-        // var wavesurfer = WaveSurfer.create({
-        //     container: '#waveform',
-        // });
-        let wavesurfer = WaveSurfer.create({
-            container: document.querySelector('#waveform'),
-            plugins: [
-                WaveSurfer.cursor.create({
-                    showTime: true,
-                    opacity: 1,
-                    customShowTimeStyle: {
-                        'background-color': '#000',
-                        color: '#fff',
-                        padding: '2px',
-                        'font-size': '10px'
-                    }
-                })
-            ]
-        });
-        wavesurfer.load(`./audio/${uploadFile.name}`);
-        document.getElementById('btnPlay').addEventListener('click', function () {
-            wavesurfer.play();
-        });
-        document.getElementById('btnPause').addEventListener('click', function () {
-            wavesurfer.pause();
-        });
 
         // console.warn('上传的文件:', uploadFile)
         audioEncoder({
