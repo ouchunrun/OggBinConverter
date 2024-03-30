@@ -35,8 +35,19 @@ function createRecorder(data){
 
     mediaRecorder.ondataavailable = function (blob, vibrationTag) {
         console.log('Data ondataavailable received')
-        let file =   new File([blob], `${mediaRecorder.fileName}.${data.encoderType}`)
+        let file = new File([blob], `${mediaRecorder.fileName}.${data.encoderType}`)
         mediaRecorder.recoderOptions.doneCallBack(file , vibrationTag, blob)
+
+        // 获取振动数据
+        // window.onsetDetection = new AudioOnsetDetection()
+        // onsetDetection.init()
+        // onsetDetection.readFile(file)
+        // onsetDetection.on('onVibrationDataCompleted', function (tagsInfo){
+        //     // window.spectralFlux = onsetDetection.spectralFlux
+        //     // window.prunnedSpectralFlux = onsetDetection.timePeriodAndAverage
+        //     // window.threshold = onsetDetection.threshold
+        //     mediaRecorder.recoderOptions.doneCallBack(file, tagsInfo, blob)
+        // })
     }
 
     return mediaRecorder

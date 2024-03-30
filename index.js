@@ -91,7 +91,7 @@ recordingDurationInput.onchange = function (e){
 function fileOnChange(file){
     if(file){
         console.log('upload file: ', file.name)
-        setWavesurfer(file)
+        // setWavesurfer(file)
         if (!/audio\/\w+/.test(file.type)) {
             // selectButton.disabled = false
             // selectButton.style.opacity = '1'
@@ -149,6 +149,25 @@ function formatFileSize(fileSize){
 }
 
 /**
+ * 建立一个可存取到该file的url
+ * @param file
+ * @returns {null}
+ */
+function getObjectURL(file) {
+    var url = null;
+    // 下面函数执行的效果是一样的，只是需要针对不同的浏览器执行不同的 js 函数而已
+    if (window.createObjectURL != undefined) {   // basic
+        url = window.createObjectURL(file);
+    } else if (window.URL != undefined) {        // mozilla(firefox)
+        url = window.URL.createObjectURL(file);
+    } else if (window.webkitURL != undefined) {  // webkit or chrome
+        url = window.webkitURL.createObjectURL(file) ;
+    }
+    return url;
+
+}
+
+/**
  * 加载并显示音频波形可视化组件
  * @param file
  */
@@ -169,7 +188,9 @@ function setWavesurfer(file){
             })
         ]
     });
-    wavesurfer.load(`./audio/30_second/${file.name}`);
+
+    // 设置文件路径，显示wave波形
+    wavesurfer.load(getObjectURL(file));
 
     document.getElementById('btnPlay').addEventListener('click', function () {
         wavesurfer.play(); // 播放的开始时间和结束时间
@@ -211,6 +232,12 @@ fileSwitchButton.onclick = function (){
         consoleLogPrint('audio fade out enabled ' + audioFadeOut.checked)
         let outputFormat = outputFormatSelect.options[outputFormatSelect.selectedIndex].value
         console.log('outputFormat:', outputFormat)
+
+        window.onsetDetection = new AudioOnsetDetection()
+        onsetDetection.init()
+        onsetDetection.on('onVibrationDataCompleted', function (){
+            processGraphicDisplay()
+        })
 
         // console.warn('上传的文件:', uploadFile)
         audioEncoder({
@@ -258,29 +285,32 @@ fileSwitchButton.onclick = function (){
 
                 let dataBlob = new Blob([blob], {type: `audio/${outputFormat}`});
                 let url = URL.createObjectURL(dataBlob)
+                setWavesurfer(file)
+
                 if(outputFormat !== 'bin'){  // gsbin 格式无法在线播放
                     let audioPlayer = document.querySelector("#player > audio")
                     audioPlayer.src = url;
                     recorderPlayer.style.display = 'block'
 
-
                     /*******************************************音频可视化处理******************************************/
-                    let parentEle = document.getElementById('vibrationElement')
-                    let averageScore = window.averageVolume * 50
-                    parentEle.style.height = averageScore + 'px'
-                    for(let i = 0; i<maxVolumeBuffer.length; i++){
-                        let buffer = maxVolumeBuffer[i] * 50   // 放大，否则高度太小，不利于观察
-                        let newEle = document.createElement('div')
-                        newEle.style.height = (buffer) + 'px'
-                        newEle.className = 'line'
+                    // 方案一：
+                    // let parentEle = document.getElementById('vibrationElement')
+                    // let averageScore = window.averageVolume * 50
+                    // parentEle.style.height = averageScore + 'px'
+                    // for(let i = 0; i<maxVolumeBuffer.length; i++){
+                    //     let buffer = maxVolumeBuffer[i] * 50   // 放大，否则高度太小，不利于观察
+                    //     let newEle = document.createElement('div')
+                    //     newEle.style.height = (buffer) + 'px'
+                    //     newEle.className = 'line'
+                    //
+                    //     if(buffer>=averageScore){
+                    //         // console.log('振动...')
+                    //         newEle.style.backgroundColor = 'red'
+                    //     }
+                    //     parentEle.appendChild(newEle)
+                    // }
 
-                        if(buffer>=averageScore){
-                            // console.log('振动...')
-                            newEle.style.backgroundColor = 'red'
-                        }
-                        parentEle.appendChild(newEle)
-                    }
-
+                    processGraphicDisplay(true)
                 }
 
                 // 生成下载链接
@@ -309,6 +339,55 @@ fileSwitchButton.onclick = function (){
                 setTip({type: 'error', message: error.message, showTip: true})
             }
         })
+    }
+}
+
+function processGraphicDisplay(average){
+    let createDiv = function (chunks, parentId, childClass, color){
+        let parentEle = document.getElementById(parentId)
+
+        let width = (800 / chunks.length).toFixed(2)
+        for(let i = 0; i<chunks.length; i++){
+            let buffer = chunks[i]
+            let newEle = document.createElement('div')
+            newEle.className = childClass
+            newEle.style.width = width + 'px'
+
+            if(buffer){
+                let height = Number(buffer * 50) + 5   // 放大，否则高度太小，不利于观察
+                newEle.style.height = height + 'px'
+                newEle.style.backgroundColor = color
+
+            }else {
+                newEle.style.height = '0.1px'
+                newEle.style.backgroundColor = '#abb3bf'
+            }
+            parentEle.appendChild(newEle)
+        }
+    }
+
+    if(average){
+        if(window.maxVolumeBuffer){
+            createDiv(window.maxVolumeBuffer, 'maxVolume', 'maxVolume', '#2d72d2')
+        }
+    }else {
+        if(window.onsetDetection){
+            // 方案二：
+            // 光谱通量
+            if(onsetDetection.spectralFlux){
+                createDiv(onsetDetection.spectralFlux, 'spectralFlux', 'spectralFlux', 'orange')
+            }
+            // 修剪后的光谱通量峰值数据
+            if(onsetDetection.prunnedSpectralFlux){
+                createDiv(onsetDetection.prunnedSpectralFlux, 'prunnedSpectralFlux', 'prunnedSpectralFlux', 'blue')
+            }
+            // 光谱通量平均值
+            if(onsetDetection.threshold){
+                createDiv(onsetDetection.threshold, 'threshold', 'threshold', 'green')
+            }
+        }else {
+            console.error('window.onsetDetection is not found!')
+        }
     }
 }
 

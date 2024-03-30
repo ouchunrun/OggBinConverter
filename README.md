@@ -21,6 +21,11 @@
 - 输出文件后缀为 .bin
 - 输出文件尺寸不超过192KB（GRP话机限制）
 
+### 音频振动实现方案
+
+* 获取所有的最大音量并计算音量平均值，连续高于平均值的时间段即标记为振动时间段。
+* 首次振动时间点大于三秒时，重新计算首次振动点前的数据（方法同上），再次获取振动时间段。规避前奏不振动问题
+
 ## LICENSE
 
 - [opus-recorder](https://github.com/chris-rudmin/opus-recorder/blob/master/LICENSE.md)

@@ -42,20 +42,19 @@ window.Recorder = function (config, data) {
   this.recoderOptions = data
   this.stream = null
   this.recordingDuration = data.recordingDuration || 30   // 指定录制时长，默认最大30秒
-  this.fadeOutEnabled = data.audioFadeOut === undefined ? true : data.audioFadeOut
+  this.fadeOutEnabled = true
   this.fadeOutBeenSet = false            // 是否设置渐弱 已设置
   this.gainFadeOutTime = this.recordingDuration * 0.25            // 音频渐弱时间
   this.recorderStopHandler = null     // 停止record的回调处理函数
 
   // 随音乐变化振动效果的实现
-  this.maxVolume = 0 // 采样点幅度最大值
-  this.totalVolume = 0 // 累加音量值
-  this.volumeCount = 0 // 有效采样周期个数
-  this.averageVolume = 0 // 平均音量
-  this.maxVolumeBuffer = [] //
+  this.maxVolumeBuffer = []
+  this.tagsInfo = ''
   this.vibrationTag = '' // 振动标记
   this.audioprocessDuration = 0 // onaudioprocess事件触发的时间间隔
   this.vibrationTagHasBeenSet = false
+
+  this.setFadeOut(data.audioFadeOut)
 }
 
 
@@ -99,6 +98,17 @@ Recorder.ERROR_MESSAGE = {
       message: 'CONVERSION ERROR: ' + error || 'unknown error'
     }
   }
+}
+
+Recorder.prototype.setFadeOut = function (audioFadeOut){
+  let audioFadeOutInStorage = localStorage.getItem('audioFadeOut')
+  console.log('localStorage audioFadeOut: ', audioFadeOutInStorage)
+  if(audioFadeOutInStorage === 'true' || audioFadeOutInStorage === 'false'){
+    this.fadeOutEnabled = audioFadeOutInStorage === 'true'  // 布尔值转换
+  }else {
+    this.fadeOutEnabled = audioFadeOut === undefined ? true : audioFadeOut
+  }
+  console.log('set audioFadeOut ', this.fadeOutEnabled)
 }
 
 // Static Methods
@@ -212,42 +222,71 @@ Recorder.prototype.initAudioContext = function (sourceNode){
  *    t2 = this.audioprocessDuration * i  // 结束时间为上次非0的时间点
  *  6.最后返回格式为值为JSON数组 （["VIBRATION=0.0-1.1;"] 的数据，作为URL参数发送给服务器进行振动处理，振动数据需要用 encodeURIComponent 编码处理
  */
-
 /**
  * 获取高于平均值的振动时间段
+ * @param firstVibrationIndex 初次振动的索引
  */
-Recorder.prototype.setVibrationTags = function (){
+Recorder.prototype.calculateVibrationSegment = function (firstVibrationIndex){
   let cache = {}
   let tags = ''
-  for(let i = 0; i<this.maxVolumeBuffer.length; i++){
-    let buffer = this.maxVolumeBuffer[i].toFixed(2) // 保留两位数
-    if(buffer >= this.averageVolume){
+  let volumeBuffer
+  let averageVolume
+
+  if(firstVibrationIndex){
+    volumeBuffer = this.maxVolumeBuffer.slice(0, firstVibrationIndex - 1)
+  }else {
+    volumeBuffer = this.maxVolumeBuffer
+  }
+  let sumBuffer = volumeBuffer.reduce((a, b) => a + b, 0);
+  averageVolume = sumBuffer / volumeBuffer.length;
+  let startTime
+
+  for(let i = 0; i<volumeBuffer.length; i++){
+    let buffer = volumeBuffer[i].toFixed(2) // 保留两位数
+    if(buffer >= averageVolume){
       if(!cache.t1){
         cache.t1 = this.audioprocessDuration * (i+1)  // 每次触发的间隔时间为audioprocessDuration，所以处理索引即可
+      }
+
+      if(i === volumeBuffer.length - 1){  // 最后一个数据
+        cache.t2 = this.audioprocessDuration * i  // 结束时间为上次非0的时间点
+        if(cache.t2 !== cache.t1){
+          tags = tags + cache.t1.toFixed(2) + '-' + cache.t2.toFixed(2) + ';' // 时间以秒为单位，保留两位小数
+          if(!startTime){
+            startTime = cache.t1
+          }
+        }
       }
     }else {
       if(cache.t1){
         cache.t2 = this.audioprocessDuration * i  // 结束时间为上次非0的时间点
         if(cache.t2 !== cache.t1){
-          if(!tags){
-            tags = tags + "VIBRATION="
-          }
           tags = tags + cache.t1.toFixed(2) + '-' + cache.t2.toFixed(2) + ';' // 时间以秒为单位，保留两位小数
+          if(!startTime){
+            startTime = cache.t1
+          }
         }else {
-          // 只有开始时间时，不添加
+          // only start time
         }
         cache = {}
       }
     }
   }
 
-  if(tags){
-    let tagsInfo = '["' + tags + '"]'
-    console.log('get tags info as:', tagsInfo)
-    this.vibrationTag = encodeURIComponent(tagsInfo)
-    console.log('encodeURIComponent tags info: ', this.vibrationTag)
+  this.tagsInfo = tags +  this.tagsInfo
+
+  // 初始振动时间在3秒以后，则重新计算3秒前的数据，重新获取振动时间段
+  if(startTime > 3){
+    this.calculateVibrationSegment( parseInt(startTime / this.audioprocessDuration))
   }else {
-    console.warn('No vibration data obtained!!')
+    if(this.tagsInfo){
+      let tagsInfo = '["VIBRATION=' + this.tagsInfo + '"]'
+      console.log('get tags info as:', tagsInfo)
+      this.vibrationTag = encodeURIComponent(tagsInfo)
+      console.log('encodeURIComponent tags info: ', this.vibrationTag)
+    }else {
+      console.warn('No vibration data obtained!!')
+    }
   }
 }
 
@@ -261,23 +300,21 @@ Recorder.prototype.volumeCalculate = function (data = {}){
     // 获得缓冲区的输入音频，转换为包含了PCM通道数据的32位浮点数组
     const inputData = data.event.inputBuffer.getChannelData(0)  // 可以获取单个声道的PCM数据
     // 获取缓冲区中最大的音量值
-    this.maxVolume = Math.max(...inputData)
-    if(this.maxVolume){
-      this.maxVolumeBuffer.push(this.maxVolume)
-      this.totalVolume += this.maxVolume
-      this.volumeCount++
+    let maxVolume = Math.max(...inputData)
+    if(maxVolume){
+      this.maxVolumeBuffer.push(maxVolume)
     }else {
       // console.log('a volume of 0 does not count towards processing')
     }
   }else {
     this.vibrationTagHasBeenSet = true
-    this.averageVolume = (this.totalVolume / this.volumeCount).toFixed(2)
-    console.log('Average volume: ', this.averageVolume)
-    this.setVibrationTags()
+    this.calculateVibrationSegment()
 
     // for test
     window.averageVolume = this.averageVolume
     window.maxVolumeBuffer = this.maxVolumeBuffer
+    console.warn('window.averageVolume:', window.averageVolume)
+    console.warn('window.maxVolumeBuffer:', window.maxVolumeBuffer)
   }
 }
 /**********************************************************************************************************************/
@@ -329,7 +366,15 @@ Recorder.prototype.initAudioGraph = function (){
 
       // 计算音量
       This.volumeCalculate({event: e, end: false})
+
+      if(window.onsetDetection){
+        window.onsetDetection.readSamples(e.inputBuffer)
+      }
     } else {
+      if(window.onsetDetection){
+        window.onsetDetection.readSamples()
+      }
+
       console.log('process count: ', audioprocessCount)
       console.log('audio process total duration: ', audioprocessTotalDuration)
       This.volumeCalculate({event: null, end: true})
@@ -461,6 +506,10 @@ Recorder.prototype.stop = function (){
   if(!this.vibrationTagHasBeenSet){
     console.log('Vibration tags is not obtained')
     This.volumeCalculate({event: null, end: true})
+
+    if(window.onsetDetection){
+      window.onsetDetection.readSamples()
+    }
   }
 
   if (this.state !== 'inactive') {

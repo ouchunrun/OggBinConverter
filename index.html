@@ -101,6 +101,11 @@
 <div>
     <div id="waveform" class="waveform"></div>
     <div id="vibrationElement"></div>
+
+    <div id="spectralFlux" class="vibration spectralflux"></div>
+    <div id="prunnedSpectralFlux" class="vibration spectralflux"></div>
+    <div id="threshold" class="vibration spectralflux"></div>
+    <div id="maxVolume" class="vibration spectralflux"></div>
 </div>
 
 <footer class="app-footer">
@@ -120,6 +125,9 @@
 <script type="application/javascript" src="toOgg/oggOpusEncoderWorker.js"></script>
 <!--预加载结束-->
 
+<script type="text/javascript" src="src/Analyser.js"></script>
+<script type="text/javascript" src="src/dsp.js"></script>
+<script type="text/javascript" src="src/audio-onset-detection.js"></script>
 <script type="text/javascript" src="src/recorder.js"></script>
 <script type="text/javascript" src="src/encoder.js"></script>
 <script type="text/javascript" src="index.js"></script>

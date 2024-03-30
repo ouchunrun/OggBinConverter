@@ -330,16 +330,47 @@ input:disabled{
     animation: vibrationAnimation linear infinite alternate;
     position: absolute;
     top: 587px;
+    /*top: 620px;*/
     z-index: 99;
 }
 
 #vibrationElement div{
-    width: 2.3px;
+    width: 5.3px;
     background: black;
     display: inline-block;
     /*margin-right: 1px;*/
     float: left;
 }
+
+
+.vibration {
+    opacity: 0.5;
+    width: 800px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: vibrationAnimation linear infinite alternate;
+    position: absolute;
+    z-index: 99;
+}
+#spectralFlux{
+    top: 660px;
+}
+#threshold{
+    top: 740px;
+}
+#prunnedSpectralFlux{
+    top: 800px;
+}
+#maxVolume{
+    top: 700px;
+}
+
+.spectralflux div{
+    background: black;
+    display: inline-block;
+    float: left;
+}
+
 
 @keyframes vibrationAnimation {
     0% {
